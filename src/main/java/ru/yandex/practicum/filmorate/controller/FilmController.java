@@ -2,54 +2,45 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.constant.ValidationError;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.validation.FilmValidator;
 
 import javax.validation.Valid;
-import javax.validation.ValidationException;
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 
 @RestController
 @Slf4j
 @RequestMapping("/films")
 public class FilmController {
 
-    private int id = 1;
-    private final HashMap<Integer, Film> films = new HashMap<>();
+    private final Map<Integer, Film> films = new HashMap<>();
 
     @GetMapping
-    public List<Film> getFilms() {
+    public Collection<Film> getFilms() {
         return new ArrayList<>(films.values());
     }
 
     @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) {
-        LocalDate firstFilmDate = LocalDate.of(1895, 11, 28);
-
-        if (firstFilmDate.isAfter(film.getReleaseDate())) {
-            throw new ValidationException("Указана неверная дата!");
-        }
-
-        film.setId(id);
-
-        id += 1;
-
         log.debug("Создается фильм: {}", film);
 
+        film.setId(films.size() + 1);
         films.put(film.getId(), film);
 
         return film;
     }
 
     @PutMapping
-    public Film updateFilm(@RequestBody Film film) {
+    public Film updateFilm(@Valid @RequestBody Film film) throws NotFoundException {
         log.debug("Обновляется фильм: {}", film);
 
-        if (Objects.isNull(films.get(film.getId()))) {
-            throw new ValidationException("Такого фильма нет");
+        if (FilmValidator.isFilmNotFound(films, film)) {
+            throw new NotFoundException(ValidationError.FILM_NOT_FOUND);
         }
 
         films.put(film.getId(), film);
