@@ -9,16 +9,16 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Set;
 
 class UserTest {
 
-    private final User user = User.builder()
-            .login("dolore")
+    private final User user = User
+            .builder()
+            .login("a_b")
             .name("Nick Name")
             .email("mail@mail.ru")
-            .birthday(LocalDate.of(1946, Calendar.SEPTEMBER, 28))
+            .birthday(LocalDate.now())
             .build();
     private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
     private final Validator validator = validatorFactory.getValidator();
@@ -69,7 +69,7 @@ class UserTest {
     void shouldNotCreateUserIfBirthdayIsWrong() {
         User userWithIncorrectBirthday = user
                 .toBuilder()
-                .birthday(LocalDate.of(2446, Calendar.SEPTEMBER, 20))
+                .birthday(LocalDate.now().plusDays(1))
                 .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(userWithIncorrectBirthday);

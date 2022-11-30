@@ -1,7 +1,4 @@
-package ru.yandex.practicum.filmorate.annotation;
-
-import ru.yandex.practicum.filmorate.constant.ValidationError;
-import ru.yandex.practicum.filmorate.validation.ReleaseDateValidator;
+package ru.yandex.practicum.filmorate.validation;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -17,7 +14,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Constraint(validatedBy = ReleaseDateValidator.class)
 public @interface ReleaseDate {
 
-    String message() default ValidationError.INVALID_DATE;
+    String message() default "Указана неверная дата.";
 
     Class<?>[] groups() default {};
 

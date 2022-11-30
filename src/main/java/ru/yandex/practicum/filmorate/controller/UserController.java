@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.constant.ValidationError;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.validation.UserValidator;
@@ -42,7 +41,7 @@ public class UserController {
         log.debug("Обновляется пользователь: {}", user);
 
         if (UserValidator.isUserNotFound(users, user)) {
-            throw new NotFoundException(ValidationError.USER_NOT_FOUND);
+            throw new NotFoundException("Такого пользователя нет.");
         }
 
         setUserName(user);

@@ -9,7 +9,6 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Set;
 
 class FilmTest {
@@ -17,7 +16,7 @@ class FilmTest {
     private final Film film = Film.builder()
             .name("nisi eiusmod")
             .description("adipisicing")
-            .releaseDate(LocalDate.of(1967, Calendar.MARCH, 25))
+            .releaseDate(LocalDate.parse("1895-12-28").plusDays(1))
             .duration(100)
             .build();
     private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
@@ -50,9 +49,7 @@ class FilmTest {
     void shouldNotCreateFilmIfDescriptionTooLong() {
         Film filmWithIncorrectDescription = film
                 .toBuilder()
-                .description("Пятеро друзей ( комик-группа «Шарло»), приезжают в город Бризуль. Здесь они хотят" +
-                        " разыскать господина Огюста Куглова, который задолжал им деньги, а именно 20 миллионов." +
-                        " о Куглов, который за время «своего отсутствия», стал кандидатом Коломбани.")
+                .description("a".repeat(Film.FILM_DESCRIPTION_MAX_LENGTH + 1))
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(filmWithIncorrectDescription);
@@ -65,7 +62,7 @@ class FilmTest {
     void shouldNotCreateFilmIfReleaseDateIsWrong() {
         Film filmWithIncorrectReleaseDate = film
                 .toBuilder()
-                .releaseDate(LocalDate.of(1890, Calendar.MARCH, 25))
+                .releaseDate(LocalDate.parse("1895-12-27"))
                 .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(filmWithIncorrectReleaseDate);

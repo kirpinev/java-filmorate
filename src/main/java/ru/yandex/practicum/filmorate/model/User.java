@@ -5,7 +5,7 @@ import lombok.Data;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Past;
+import javax.validation.constraints.PastOrPresent;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 
@@ -16,10 +16,10 @@ public class User {
     @Email(regexp = "^[a-zA-Z0-9_!#$%&’*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
     @NotBlank
     private String email;
-    @Pattern(regexp = "^[a-zA-Z0-9]+")
+    @Pattern(regexp = "^[^\\s]+$")
     @NotBlank
     private String login;
     private String name;
-    @Past
+    @PastOrPresent
     private LocalDate birthday;
 }
