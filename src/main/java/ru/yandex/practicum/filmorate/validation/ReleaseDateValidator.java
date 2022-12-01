@@ -10,6 +10,6 @@ public class ReleaseDateValidator implements ConstraintValidator<ReleaseDate, Lo
     public boolean isValid(LocalDate date, ConstraintValidatorContext constraintValidatorContext) {
         LocalDate firstFilmDate = LocalDate.parse("1895-12-28");
 
-        return firstFilmDate.isBefore(date);
+        return date.isEqual(firstFilmDate) || date.isAfter(firstFilmDate);
     }
 }

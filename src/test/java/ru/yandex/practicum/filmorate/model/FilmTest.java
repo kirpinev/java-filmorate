@@ -30,6 +30,18 @@ class FilmTest {
     }
 
     @Test
+    void shouldCreateFilmWithFirstFilmDate() {
+        Film filmWithFirstFilmDate = film
+                .toBuilder()
+                .releaseDate(LocalDate.parse("1895-12-28"))
+                .build();
+
+        Set<ConstraintViolation<Film>> violations = validator.validate(filmWithFirstFilmDate);
+        
+        Assertions.assertTrue(violations.isEmpty());
+    }
+
+    @Test
     void shouldNotCreateFilmIfNameIsEmpty() {
         String[] names = {"", " ", "  ", null};
 
