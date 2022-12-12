@@ -12,22 +12,22 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-    private final UserStorage inMemoryUserStorage;
+    private final UserStorage userStorage;
 
     public UserService(UserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+        this.userStorage = inMemoryUserStorage;
     }
 
     public User createUser(User user) {
-        return inMemoryUserStorage.create(user);
+        return userStorage.create(user);
     }
 
     public Map<Integer, User> getUsers() {
-        return inMemoryUserStorage.getAll();
+        return userStorage.getAll();
     }
 
     public User getUserById(Integer id) {
-        return inMemoryUserStorage.getById(id);
+        return userStorage.getById(id);
     }
 
     public List<User> getUserFriends(Integer id) {
@@ -54,12 +54,12 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        return inMemoryUserStorage.update(user);
+        return userStorage.update(user);
     }
 
     public void addFriendToUser(User user, User friend) {
         user.getFriends().add(friend.getId());
-        inMemoryUserStorage.update(user);
+        userStorage.update(user);
     }
 
     public void deleteFriendFromUser(User user, User friend) {

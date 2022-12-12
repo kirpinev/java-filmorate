@@ -11,27 +11,27 @@ import java.util.stream.Collectors;
 @Service
 public class FilmService {
 
-    private final FilmStorage inMemoryFilmStorage;
+    private final FilmStorage filmStorage;
 
     public FilmService(FilmStorage inMemoryFilmStorage) {
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
+        this.filmStorage = inMemoryFilmStorage;
     }
 
     public Film createFilm(Film film) {
-        return inMemoryFilmStorage.create(film);
+        return filmStorage.create(film);
     }
 
     public Film updateFilm(Film film) {
-        return inMemoryFilmStorage.update(film);
+        return filmStorage.update(film);
     }
 
     public Map<Integer, Film> getFilms() {
-        return inMemoryFilmStorage.getAll();
+        return filmStorage.getAll();
     }
 
     public void addLikeToFilm(Film film, Integer userId) {
         film.getLikes().add(userId);
-        inMemoryFilmStorage.update(film);
+        filmStorage.update(film);
     }
 
     public void deleteLikeFromFilm(Film film, Integer userId) {
@@ -39,7 +39,7 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        return inMemoryFilmStorage
+        return filmStorage
                 .getAll()
                 .values()
                 .stream()
@@ -49,6 +49,6 @@ public class FilmService {
     }
 
     public Film getFilmById(Integer id) {
-        return inMemoryFilmStorage.getById(id);
+        return filmStorage.getById(id);
     }
 }
