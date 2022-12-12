@@ -10,6 +10,6 @@ import java.util.Objects;
 public class FilmValidator {
 
     public static boolean isFilmNotFound(Map<Integer, Film> films, Film film) {
-        return Objects.isNull(films.get(film.getId()));
+        return Objects.isNull(film) || Objects.isNull(films.get(film.getId()));
     }
 }
