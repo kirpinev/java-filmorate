@@ -19,8 +19,10 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public Mpa getMpaById(Integer mpaId) {
+        final String sql = "select * from mpas where id = ?";
+
         try {
-            return jdbcTemplate.queryForObject(MpaSqlQueries.GET_MPA_BY_ID, new MpaMapper(), mpaId);
+            return jdbcTemplate.queryForObject(sql, new MpaMapper(), mpaId);
         } catch (Exception e) {
             return null;
         }
@@ -28,6 +30,8 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public Collection<Mpa> getAllMpa() {
-        return jdbcTemplate.query(MpaSqlQueries.GET_ALL_MPA, new MpaMapper());
+        final String sql = "select * from mpas";
+
+        return jdbcTemplate.query(sql, new MpaMapper());
     }
 }

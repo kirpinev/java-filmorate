@@ -23,10 +23,11 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
+        final String sql = "insert into users (name, login, birthday, email) values (?, ?, ?, ?)";
         KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(UserSqlQueries.CREATE_USER,
+            PreparedStatement preparedStatement = connection.prepareStatement(sql,
                     new String[]{"id"});
             preparedStatement.setString(1, user.getName());
             preparedStatement.setString(2, user.getLogin());
@@ -38,13 +39,17 @@ public class UserDbStorage implements UserStorage {
 
         int userId = Objects.requireNonNull(generatedKeyHolder.getKey()).intValue();
 
-        return user.toBuilder().id(userId).build();
+        user.setId(userId);
+
+        return user;
     }
 
     @Override
     public User getUserById(Integer userId) {
+        final String sql = "select * from users where id = ?";
+
         try {
-            return jdbcTemplate.queryForObject(UserSqlQueries.FIND_USER, new UserMapper(), userId);
+            return jdbcTemplate.queryForObject(sql, new UserMapper(), userId);
         } catch (Exception e) {
             return null;
         }
@@ -52,16 +57,37 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public Collection<User> getAllUsers() {
-        return jdbcTemplate.query(UserSqlQueries.FIND_ALL_USERS, new UserMapper());
+        final String sql = "select * from users";
+
+        return jdbcTemplate.query(sql, new UserMapper());
     }
 
     @Override
     public User updateUser(User user) {
+        final String sql = "update users set name = ?, login = ?, birthday = ?, email = ? where id = ?";
+
         jdbcTemplate.update(
-                UserSqlQueries.UPDATE_USER,
+                sql,
                 user.getName(), user.getLogin(), user.getBirthday(), user.getEmail(), user.getId()
         );
 
         return user;
+    }
+
+    @Override
+    public Collection<User> getUserFriends(Integer userId) {
+        final String sql = "select * from users where id in (select f.friend_id from users u join friendships f " +
+                "on u.id = f.user_id where u.id = ?)";
+
+        return jdbcTemplate.query(sql, new UserMapper(), userId);
+    }
+
+    @Override
+    public Collection<User> getCommonFriends(Integer user1Id, Integer user2Id) {
+        final String sql = "select * from users where id in (select friend_id from users u join friendships f on " +
+                "u.id = f.user_id where u.id = ?) and id in (select friend_id from users u join friendships f on " +
+                "u.id = f.user_id where u.id = ?)";
+
+        return jdbcTemplate.query(sql, new UserMapper(), user1Id, user2Id);
     }
 }

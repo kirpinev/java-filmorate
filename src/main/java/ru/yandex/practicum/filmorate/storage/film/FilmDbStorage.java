@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.filmMpa.FilmMpaStorage;
-import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.sql.PreparedStatement;
@@ -27,24 +26,23 @@ public class FilmDbStorage implements FilmStorage {
 
     private final FilmGenreStorage filmGenreStorage;
 
-    private final GenreStorage genreStorage;
-
-
     public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmMpaStorage filmMpaStorage, MpaStorage mpaStorage,
-                         FilmGenreStorage filmGenreStorage, GenreStorage genreStorage) {
+                         FilmGenreStorage filmGenreStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.filmMpaStorage = filmMpaStorage;
         this.mpaStorage = mpaStorage;
         this.filmGenreStorage = filmGenreStorage;
-        this.genreStorage = genreStorage;
     }
 
     @Override
     public Film createFilm(Film film) {
+        final String sql = "insert into films (name, release_date, description, duration, rate) " +
+                "values (?, ?, ?, ?, ?)";
+
         KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(FilmSqlQueries.CREATE_FILM,
+            PreparedStatement preparedStatement = connection.prepareStatement(sql,
                     new String[]{"id"});
             preparedStatement.setString(1, film.getName());
             preparedStatement.setObject(2, film.getReleaseDate());
@@ -57,52 +55,55 @@ public class FilmDbStorage implements FilmStorage {
 
         int filmId = Objects.requireNonNull(generatedKeyHolder.getKey()).intValue();
 
-        return addMpaAndGenres(film.toBuilder().id(filmId).build());
+        film.setId(filmId);
+
+        return addMpaAndGenres(film);
     }
 
     private Film addMpaAndGenres(Film film) {
+        int filmId = film.getId();
         int mpaId = film.getMpa().getId();
         Collection<Genre> genres = new LinkedHashSet<>(film.getGenres());
 
-        filmMpaStorage.addFilmMpa(film.getId(), mpaId);
-        Mpa mpa = mpaStorage.getMpaById(mpaId);
+        filmMpaStorage.addFilmMpa(filmId, mpaId);
+        genres.forEach(genre -> filmGenreStorage.addFilmGenre(filmId, genre.getId()));
 
-        genres.forEach(genre -> filmGenreStorage.addFilmGenre(film.getId(), genre.getId()));
+        Mpa filmMpa = mpaStorage.getMpaById(mpaId);
+        Collection<Genre> filmGenres = filmGenreStorage.getAllFilmGenresById(filmId);
 
-        Collection<Genre> genresWithNames = genres.stream()
-                .map(genre -> genreStorage.getGenreById(genre.getId())).collect(Collectors.toList());
-
-        return film.toBuilder().id(film.getId()).mpa(mpa).genres(genresWithNames).build();
+        return film.toBuilder().id(filmId).mpa(filmMpa).genres(filmGenres).build();
     }
 
     private Film updateMpaAndGenres(Film film) {
-        FilmMpa filmMpa = filmMpaStorage.getFilmMpaById(film.getId());
-        Mpa mpa = mpaStorage.getMpaById(filmMpa.getMpaId());
-        Collection<FilmGenre> filmGenres = filmGenreStorage.getAllFilmGenresById(film.getId());
-        Collection<Genre> genres = filmGenres.stream()
-                .map(filmGenre -> genreStorage.getGenreById(filmGenre.getGenreId()))
-                .collect(Collectors.toList());
+        int filmId = film.getId();
+        Mpa filmMpa = filmMpaStorage.getFilmMpaById(filmId);
+        Collection<Genre> filmGenres = filmGenreStorage.getAllFilmGenresById(filmId);
 
-        return film.toBuilder().mpa(mpa).genres(genres).build();
+        return film.toBuilder().mpa(filmMpa).genres(filmGenres).build();
     }
 
     @Override
     public Film getFilmById(Integer filmId) {
-        List<Film> films = jdbcTemplate.query(FilmSqlQueries.FIND_FILM_BY_ID, new FilmMapper(), filmId);
+        final String sql = "select * from films where id = ?";
+        List<Film> films = jdbcTemplate.query(sql, new FilmMapper(), filmId);
 
         return !films.isEmpty() ? updateMpaAndGenres(films.get(0)) : null;
     }
 
     @Override
     public Collection<Film> getAllFilms() {
-        Collection<Film> films = jdbcTemplate.query(FilmSqlQueries.FIND_ALL_FILMS, new FilmMapper());
+        final String sql = "select * from films";
+        Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper());
 
         return films.stream().map(this::updateMpaAndGenres).collect(Collectors.toList());
     }
 
     @Override
     public Film updateFilm(Film film) {
-        jdbcTemplate.update(FilmSqlQueries.UPDATE_FILM, film.getName(), film.getReleaseDate(), film.getDescription(),
+        final String sql = "update films set name = ?, release_date = ?, description = ?, duration = ?, " +
+                "rate = ? where id = ?";
+
+        jdbcTemplate.update(sql, film.getName(), film.getReleaseDate(), film.getDescription(),
                 film.getDuration(), film.getRate(), film.getId());
 
         filmMpaStorage.deleteFilmMpaById(film.getId());
@@ -112,7 +113,12 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilmById(Integer filmId) {
-        jdbcTemplate.update(FilmSqlQueries.DELETE_FILM_BY_ID, filmId);
+    public Collection<Film> getPopularFilms(Integer count) {
+        final String sql = "SELECT f.* FROM films f LEFT JOIN likes l ON f.ID = l.film_id GROUP BY f.name " +
+                "ORDER BY count(l.film_id) DESC limit ?";
+
+        Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper(), count);
+
+        return films.stream().map(this::updateMpaAndGenres).collect(Collectors.toList());
     }
 }

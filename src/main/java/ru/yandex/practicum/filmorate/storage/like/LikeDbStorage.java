@@ -3,9 +3,6 @@ package ru.yandex.practicum.filmorate.storage.like;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Like;
-
-import java.util.Collection;
 
 @Component
 @Qualifier("LikeDbStorage")
@@ -19,21 +16,15 @@ public class LikeDbStorage implements LikeStorage {
 
     @Override
     public void addLikeToFilm(Integer filmId, Integer userId) {
-        jdbcTemplate.update(LikeSqlQueries.ADD_LIKE_TO_FILM, filmId, userId);
+        final String sql = "insert into likes (film_id, user_id) values (?, ?)";
+
+        jdbcTemplate.update(sql, filmId, userId);
     }
 
     @Override
     public void deleteLikeFromFilm(Integer filmId, Integer userId) {
-        jdbcTemplate.update(LikeSqlQueries.DELETE_LIKE_FROM_FILM, filmId, userId);
-    }
+        final String sql = "delete from likes where film_id = ? and user_id = ?";
 
-    @Override
-    public Collection<Like> getAllLikes() {
-        return jdbcTemplate.query(LikeSqlQueries.GET_ALL_LIKES, new LikeMapper());
-    }
-
-    @Override
-    public Collection<Like> getTopLikes(Integer count) {
-        return jdbcTemplate.query(LikeSqlQueries.GET_TOP_LIKES, new LikeMapper(), count);
+        jdbcTemplate.update(sql, filmId, userId);
     }
 }

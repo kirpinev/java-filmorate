@@ -101,13 +101,4 @@ public class FilmStorageTest {
         assertEquals(updatedFilm.getMpa().getId(), newFilm.getMpa().getId());
         assertEquals(updatedFilm.getMpa().getName(), "G");
     }
-
-    @Test
-    public void deleteFilm() {
-        filmStorage.deleteFilmById(newFilm.getId());
-
-        Collection<Film> films = filmStorage.getAllFilms();
-
-        assertEquals(films.size(), 0);
-    }
 }

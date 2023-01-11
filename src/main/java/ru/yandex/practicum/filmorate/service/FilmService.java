@@ -4,13 +4,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Like;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.validation.FilmValidator;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
@@ -43,27 +41,18 @@ public class FilmService {
     }
 
     public void addLikeToFilm(Integer filmId, Integer userId) {
-        Film film = getFilmById(filmId);
-        User user = userService.getUserById(userId);
-
-        likeService.addLikeToFilm(film.getId(), user.getId());
+        likeService.addLikeToFilm(filmId, userId);
     }
 
     public void deleteLikeFromFilm(Integer filmId, Integer userId) {
-        Film film = getFilmById(filmId);
+        // здесь запрашиваю пользователя потому что нужно проверить существует он или нет
         User user = userService.getUserById(userId);
 
-        likeService.deleteLikeFromFilm(film.getId(), user.getId());
+        likeService.deleteLikeFromFilm(filmId, user.getId());
     }
 
     public Collection<Film> getPopularFilms(Integer count) {
-        Collection<Like> likes = likeService.getTopLikes(count);
-
-        if (likes.isEmpty()) {
-            return getFilms().stream().limit(count).collect(Collectors.toList());
-        }
-
-        return likes.stream().map(like -> getFilmById(like.getFilmId())).collect(Collectors.toList());
+        return filmStorage.getPopularFilms(count);
     }
 
     public Film getFilmById(Integer id) {
