@@ -23,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class UserStorageTest {
 
     private final UserStorage userStorage;
-
     private final User user = new User()
             .toBuilder()
             .name("Игорь")

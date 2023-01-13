@@ -13,7 +13,6 @@ import java.util.Collection;
 public class MpaService {
 
     private static final String NOT_FOUND_MESSAGE = "MPA рейтинга с id %s нет";
-
     private final MpaStorage mpaStorage;
 
     public MpaService(@Qualifier("MpaDbStorage") MpaStorage mpaStorage) {

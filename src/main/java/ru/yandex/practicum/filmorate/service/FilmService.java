@@ -15,9 +15,7 @@ public class FilmService {
 
     private static final String NOT_FOUND_FILM = "фильма с id %s нет";
     private final FilmStorage filmStorage;
-
     private final UserService userService;
-
     private final LikeService likeService;
 
     public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage, UserService userService, LikeService likeService) {
@@ -31,7 +29,9 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
-        checkFilmIsNotNull(film, film.getId());
+        Film filmFromBD = filmStorage.getFilmById(film.getId());
+
+        checkFilmIsNotFound(filmFromBD, film.getId());
 
         return filmStorage.updateFilm(film);
     }
@@ -45,7 +45,6 @@ public class FilmService {
     }
 
     public void deleteLikeFromFilm(Integer filmId, Integer userId) {
-        // здесь запрашиваю пользователя потому что нужно проверить существует он или нет
         User user = userService.getUserById(userId);
 
         likeService.deleteLikeFromFilm(filmId, user.getId());
@@ -58,13 +57,13 @@ public class FilmService {
     public Film getFilmById(Integer id) {
         Film film = filmStorage.getFilmById(id);
 
-        checkFilmIsNotNull(film, id);
+        checkFilmIsNotFound(film, id);
 
         return film;
     }
 
-    private void checkFilmIsNotNull(Film film, Integer id) {
-        if (FilmValidator.isFilmNotFound(getFilms(), film)) {
+    private void checkFilmIsNotFound(Film film, Integer id) {
+        if (FilmValidator.isFilmNull(film)) {
             throw new NotFoundException(String.format(NOT_FOUND_FILM, id));
         }
     }

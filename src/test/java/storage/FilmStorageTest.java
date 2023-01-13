@@ -28,7 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class FilmStorageTest {
 
     private final FilmStorage filmStorage;
-
     private final Film film = new Film()
             .toBuilder()
             .name("Фильм")

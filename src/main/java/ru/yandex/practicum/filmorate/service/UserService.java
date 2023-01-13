@@ -15,7 +15,6 @@ public class UserService {
 
     private static final String NOT_FOUND_MESSAGE = "пользователя с id %s нет";
     private final UserStorage userStorage;
-
     private final FriendshipStorage friendshipStorage;
 
     public UserService(@Qualifier("UserDbStorage") UserStorage userStorage,
@@ -37,7 +36,7 @@ public class UserService {
     public User getUserById(Integer id) {
         User user = userStorage.getUserById(id);
 
-        checkUserIsNotNull(user, id);
+        checkUserIsNotFound(user, id);
 
         return user;
     }
@@ -51,14 +50,15 @@ public class UserService {
     }
 
     public User updateUser(User user) {
-        checkUserIsNotNull(user, user.getId());
+        User userFromBD = userStorage.getUserById(user.getId());
+
+        checkUserIsNotFound(userFromBD, user.getId());
         setUserName(user);
 
         return userStorage.updateUser(user);
     }
 
     public void addFriend(Integer userId, Integer friendId) {
-        // здесь запрашиваю друга потому что нужно проверить существует он или нет
         friendshipStorage.addFriend(userId, getUserById(friendId).getId());
     }
 
@@ -66,8 +66,8 @@ public class UserService {
         friendshipStorage.deleteFriend(userId, friendId);
     }
 
-    private void checkUserIsNotNull(User user, Integer id) {
-        if (UserValidator.isUserNotFound(getAllUsers(), user)) {
+    private void checkUserIsNotFound(User user, Integer id) {
+        if (UserValidator.isUserNotFound(user)) {
             throw new NotFoundException(String.format(NOT_FOUND_MESSAGE, id));
         }
     }
