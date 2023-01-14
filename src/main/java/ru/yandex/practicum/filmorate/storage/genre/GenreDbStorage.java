@@ -12,6 +12,7 @@ import java.util.Collection;
 public class GenreDbStorage implements GenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final String genresSql = "select * from genres";
 
     public GenreDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -19,10 +20,8 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Genre getGenreById(Integer genreId) {
-        final String sql = "select * from genres where id = ?";
-
         try {
-            return jdbcTemplate.queryForObject(sql, new GenreMapper(), genreId);
+            return jdbcTemplate.queryForObject(genresSql.concat(" where id = ?"), new GenreMapper(), genreId);
         } catch (Exception e) {
             return null;
         }
@@ -30,8 +29,6 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Collection<Genre> getAllGenres() {
-        final String sql = "select * from genres";
-
-        return jdbcTemplate.query(sql, new GenreMapper());
+        return jdbcTemplate.query(genresSql, new GenreMapper());
     }
 }

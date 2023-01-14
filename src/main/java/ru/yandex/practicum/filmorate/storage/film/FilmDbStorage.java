@@ -22,6 +22,8 @@ public class FilmDbStorage implements FilmStorage {
     private final FilmMpaStorage filmMpaStorage;
     private final MpaStorage mpaStorage;
     private final FilmGenreStorage filmGenreStorage;
+    private final String filmsSql = "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join film_mpas fm on f.id = fm.film_id " +
+            "left join mpas m on fm.mpa_id = m.id";
 
     public FilmDbStorage(JdbcTemplate jdbcTemplate, FilmMpaStorage filmMpaStorage, MpaStorage mpaStorage,
                          FilmGenreStorage filmGenreStorage) {
@@ -59,9 +61,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilmById(Integer filmId) {
-        final String sql = "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join film_mpas fm on f.id = fm.film_id " +
-                "left join mpas m on fm.mpa_id = m.id where f.id = ?";
-        List<Film> films = jdbcTemplate.query(sql, new FilmMapper(), filmId);
+        List<Film> films = jdbcTemplate.query(filmsSql.concat(" where f.id = ?"), new FilmMapper(), filmId);
 
         if (!films.isEmpty()) {
             Collection<Genre> filmGenres = filmGenreStorage.getAllFilmGenresById(filmId);
@@ -74,9 +74,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getAllFilms() {
-        final String sql = "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join film_mpas fm on f.id = fm.film_id " +
-                "left join mpas m on fm.mpa_id = m.id";
-        Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper());
+        Collection<Film> films = jdbcTemplate.query(filmsSql, new FilmMapper());
 
         return setFilmGenres(films);
     }
@@ -119,10 +117,9 @@ public class FilmDbStorage implements FilmStorage {
     private Film addMpaAndGenres(Film film) {
         int filmId = film.getId();
         int mpaId = film.getMpa().getId();
-        Collection<Genre> genres = new LinkedHashSet<>(film.getGenres());
 
         filmMpaStorage.addFilmMpa(filmId, mpaId);
-        genres.forEach(genre -> filmGenreStorage.addFilmGenre(filmId, genre.getId()));
+        new LinkedHashSet<>(film.getGenres()).forEach(genre -> filmGenreStorage.addFilmGenre(filmId, genre.getId()));
 
         Mpa filmMpa = mpaStorage.getMpaById(mpaId);
         Collection<Genre> filmGenres = filmGenreStorage.getAllFilmGenresById(filmId);

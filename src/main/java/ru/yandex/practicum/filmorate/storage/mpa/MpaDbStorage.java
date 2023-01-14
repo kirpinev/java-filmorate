@@ -12,6 +12,7 @@ import java.util.Collection;
 public class MpaDbStorage implements MpaStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final String mpasSql = "select * from mpas";
 
     public MpaDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -19,10 +20,8 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public Mpa getMpaById(Integer mpaId) {
-        final String sql = "select * from mpas where id = ?";
-
         try {
-            return jdbcTemplate.queryForObject(sql, new MpaMapper(), mpaId);
+            return jdbcTemplate.queryForObject(mpasSql.concat(" where id = ?"), new MpaMapper(), mpaId);
         } catch (Exception e) {
             return null;
         }
@@ -30,8 +29,6 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public Collection<Mpa> getAllMpa() {
-        final String sql = "select * from mpas";
-
-        return jdbcTemplate.query(sql, new MpaMapper());
+        return jdbcTemplate.query(mpasSql, new MpaMapper());
     }
 }
