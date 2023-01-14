@@ -1,7 +1,5 @@
 # java-filmorate
 
-Template repository for Filmorate project.
-
 # Диаграмма базы данных
 
 <img alt="Диаграмма базы данных" src="diagram.png">
