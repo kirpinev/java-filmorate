@@ -24,7 +24,7 @@ public class FilmDirectorDbStorage implements FilmDirectorStorage {
             return;
         }
 
-        String sqlQuery = "insert into FILM_DIRECTORS(DIRECTOR_ID, FILM_ID) " +
+        String sqlQuery = "insert into film_directors(director_id, film_id) " +
             "values ( ?, ? )";
 
         try {
@@ -34,17 +34,18 @@ public class FilmDirectorDbStorage implements FilmDirectorStorage {
                     ps.setLong(2, filmId);
                 });
         }
-        catch (DataIntegrityViolationException ignored) {
+        catch (DataIntegrityViolationException e) {
+            log.error(e.getMessage());
         }
 
     }
 
     @Override
     public Collection<Director> getFilmDirectors(Integer filmId) {
-        String sqlQuery = "SELECT D.* " +
-            "FROM FILM_DIRECTORS FD " +
-            "JOIN DIRECTORS D ON D.DIRECTOR_ID = FD.DIRECTOR_ID " +
-            "WHERE FILM_ID = ?";
+        String sqlQuery = "select d.* " +
+            "from film_directors fd " +
+            "join directors d on d.director_id = fd.director_id " +
+            "where film_id = ?";
 
         return jdbcTemplate.query(sqlQuery, new DirectorMapper(), filmId);
     }
@@ -54,10 +55,10 @@ public class FilmDirectorDbStorage implements FilmDirectorStorage {
         Map<Integer, Collection<Director>> directorsByFilmId = new HashMap<>();
 
         String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
-        String sqlQuery = "SELECT FD.FILM_ID, D.* " +
-            "FROM FILM_DIRECTORS FD " +
-            "JOIN DIRECTORS D on D.DIRECTOR_ID = FD.DIRECTOR_ID " +
-            "WHERE FILM_ID IN (%s);";
+        String sqlQuery = "select fd.film_id, d.* " +
+            "from film_directors fd " +
+            "join directors d on d.director_id = fd.director_id " +
+            "where film_id in (%s);";
 
         DirectorMapper directorMapper = new DirectorMapper();
 
@@ -82,8 +83,8 @@ public class FilmDirectorDbStorage implements FilmDirectorStorage {
 
     @Override
     public void deleteFilmDirectors(Integer filmId) {
-        String sqlQuery = "DELETE FROM FILM_DIRECTORS " +
-            "WHERE FILM_ID = ?";
+        String sqlQuery = "delete from film_directors " +
+            "where film_id = ?";
 
         jdbcTemplate.update(sqlQuery, filmId);
     }

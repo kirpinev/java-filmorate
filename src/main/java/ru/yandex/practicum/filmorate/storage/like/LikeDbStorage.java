@@ -1,18 +1,14 @@
 package ru.yandex.practicum.filmorate.storage.like;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-@Qualifier("LikeDbStorage")
+@RequiredArgsConstructor
 public class LikeDbStorage implements LikeStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public LikeDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public void addLikeToFilm(Integer filmId, Integer userId) {

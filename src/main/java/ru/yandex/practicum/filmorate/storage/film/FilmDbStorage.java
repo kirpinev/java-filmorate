@@ -19,7 +19,6 @@ import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.sql.PreparedStatement;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -114,26 +113,26 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getDirectorFilms(Integer directorId, SortBy sortBy) {
-        String yearOrderSql = "SELECT F.*, " +
-            "       M.ID MPA_ID, " +
-            "       M.NAME MPA_NAME " +
-            "FROM FILM_DIRECTORS FD " +
-            "         JOIN FILMS F on F.ID = FD.FILM_ID " +
-            "         JOIN FILM_MPAS FM on F.ID = FM.FILM_ID " +
-            "         JOIN MPAS M on FM.MPA_ID = M.ID " +
-            "WHERE DIRECTOR_ID = ? " +
-            "ORDER BY year(F.RELEASE_DATE) asc";
+        String yearOrderSql = "select f.*, " +
+            "       m.id mpa_id, " +
+            "       m.name mpa_name " +
+            "from film_directors fd " +
+            "         join films f on f.id = fd.film_id " +
+            "         join film_mpas fm on f.id = fm.film_id " +
+            "         join mpas m on fm.mpa_id = m.id " +
+            "where director_id = ? " +
+            "order by year(f.release_date) asc";
 
-        String likesOrderSql = "SELECT F.*,  " +
-            "       M.ID MPA_ID,  " +
-            "       M.NAME MPA_NAME,  " +
-            "       (SELECT COUNT(*) FROM LIKES WHERE FD.FILM_ID = LIKES.FILM_ID) as LIKES " +
-            "FROM FILM_DIRECTORS FD " +
-            "JOIN FILMS F on F.ID = FD.FILM_ID " +
-            "JOIN FILM_MPAS FM on F.ID = FM.FILM_ID " +
-            "JOIN MPAS M on FM.MPA_ID = M.ID " +
-            "WHERE DIRECTOR_ID = ? " +
-            "ORDER BY LIKES DESC;";
+        String likesOrderSql = "select f.*,  " +
+            "       m.id mpa_id,  " +
+            "       m.name mpa_name,  " +
+            "       (select count(*) from likes where fd.film_id = likes.film_id) as likes " +
+            "from film_directors fd " +
+            "join films f on f.id = fd.film_id " +
+            "join film_mpas fm on f.id = fm.film_id " +
+            "join mpas m on fm.mpa_id = m.id " +
+            "where director_id = ? " +
+            "order by likes desc;";
 
         Collection<Film> films =
             jdbcTemplate.query(sortBy == SortBy.likes ? likesOrderSql : yearOrderSql, new FilmMapper(), directorId);
@@ -149,12 +148,14 @@ public class FilmDbStorage implements FilmStorage {
         Map<Integer, Collection<Genre>> filmGenresMap = filmGenreStorage.getAllFilmGenres(films);
         Map<Integer, Collection<Director>> filmDirectorsMap = filmDirectorStorage.getFilmDirectors(films);
 
-        return films.stream().peek(film -> {
+        films.stream().forEach(film -> {
             Integer filmId = film.getId();
 
             film.setGenres(filmGenresMap.getOrDefault(filmId, new ArrayList<>()));
             film.setDirectors(filmDirectorsMap.getOrDefault(filmId, new ArrayList<>()));
-        }).collect(Collectors.toList());
+        });
+
+        return films;
     }
 
 

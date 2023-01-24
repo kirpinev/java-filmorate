@@ -38,19 +38,21 @@ public class DirectorDbStorage implements DirectorStorage {
             return stmt;
         }, keyHolder);
 
-        if (Objects.isNull(keyHolder.getKey())) {
+        Number key = keyHolder.getKey();
+
+        if (Objects.isNull(key)) {
             throw new ConflictException(DirectorErrorMessages.conflict);
         }
 
-        director.setId(keyHolder.getKey().intValue());
+        director.setId(key.intValue());
         return director;
     }
 
     @Override
     public Director updateDirector(Director director) {
-        String sqlQuery = "update DIRECTORS set " +
-            "NAME = ? " +
-            "where DIRECTOR_ID = ?";
+        String sqlQuery = "update directors set " +
+            "name = ? " +
+            "where director_id = ?";
 
         int status = jdbcTemplate.update(
             sqlQuery,
@@ -67,9 +69,9 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public Optional<Director> getDirectorById(Integer id) {
-        String sqlQuery = "SELECT * " +
-            "FROM DIRECTORS  " +
-            "WHERE DIRECTOR_ID = ?;";
+        String sqlQuery = "select * " +
+            "from directors  " +
+            "where director_id = ?;";
 
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, new DirectorMapper(), id));
@@ -81,16 +83,16 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public Collection<Director> getAllDirectors() {
-        String sqlQuery = "SELECT * " +
-            "FROM DIRECTORS";
+        String sqlQuery = "select * " +
+            "from directors";
 
         return jdbcTemplate.query(sqlQuery, new DirectorMapper());
     }
 
     @Override
     public void deleteDirector(Integer id) {
-        String sqlQuery = "delete from DIRECTORS " +
-            "where DIRECTOR_ID = ?";
+        String sqlQuery = "delete from directors " +
+            "where director_id = ?";
 
         int status = jdbcTemplate.update(sqlQuery, id);
 

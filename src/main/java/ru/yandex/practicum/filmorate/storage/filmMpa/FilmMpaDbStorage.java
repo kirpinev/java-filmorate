@@ -1,20 +1,17 @@
 package ru.yandex.practicum.filmorate.storage.filmMpa;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaMapper;
 
 @Component
-@Qualifier("FilmMpaDbStorage")
+@RequiredArgsConstructor
 public class FilmMpaDbStorage implements FilmMpaStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public FilmMpaDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public void addFilmMpa(Integer filmId, Integer mpaId) {
