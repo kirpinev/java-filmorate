@@ -22,7 +22,8 @@ public class MpaDbStorage implements MpaStorage {
     public Mpa getMpaById(Integer mpaId) {
         try {
             return jdbcTemplate.queryForObject(mpasSql.concat(" where id = ?"), new MpaMapper(), mpaId);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             return null;
         }
     }

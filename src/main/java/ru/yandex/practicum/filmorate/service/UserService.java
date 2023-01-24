@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -11,17 +12,12 @@ import ru.yandex.practicum.filmorate.validation.UserValidator;
 import java.util.Collection;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private static final String NOT_FOUND_MESSAGE = "пользователя с id %s нет";
     private final UserStorage userStorage;
     private final FriendshipStorage friendshipStorage;
-
-    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage,
-                       @Qualifier("FriendshipDbStorage") FriendshipStorage friendshipStorage) {
-        this.userStorage = userStorage;
-        this.friendshipStorage = friendshipStorage;
-    }
 
     public User createUser(User user) {
         setUserName(user);
