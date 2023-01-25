@@ -30,21 +30,21 @@ public class FilmDbStorage implements FilmStorage {
     private final FilmGenreStorage filmGenreStorage;
     private final FilmDirectorStorage filmDirectorStorage;
     private final String filmsSql =
-        "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join film_mpas fm on f.id = fm.film_id " +
-            "left join mpas m on fm.mpa_id = m.id";
+            "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join film_mpas fm on f.id = fm.film_id " +
+                    "left join mpas m on fm.mpa_id = m.id";
 
 
     @Override
     public Film createFilm(Film film) {
         final String sql = "insert into films (name, release_date, description, duration, rate) " +
-            "values (?, ?, ?, ?, ?)";
+                "values (?, ?, ?, ?, ?)";
 
         KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                sql,
-                new String[] {"id"}
+                    sql,
+                    new String[]{"id"}
             );
             preparedStatement.setString(1, film.getName());
             preparedStatement.setObject(2, film.getReleaseDate());
@@ -86,10 +86,10 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) {
         final String sql = "update films set name = ?, release_date = ?, description = ?, duration = ?, " +
-            "rate = ? where id = ?";
+                "rate = ? where id = ?";
 
         jdbcTemplate.update(sql, film.getName(), film.getReleaseDate(), film.getDescription(),
-            film.getDuration(), film.getRate(), film.getId()
+                film.getDuration(), film.getRate(), film.getId()
         );
 
         filmMpaStorage.deleteFilmMpaById(film.getId());
@@ -100,13 +100,22 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getPopularFilms(Integer count) {
-        final String sql =
-            "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join likes l on f.id = l.film_id " +
-                "left join film_mpas fm on f.id = fm.film_id " +
-                "left join mpas m on fm.mpa_id = m.id group by f.name, f.id " +
-                "order by count(l.film_id) desc limit ?";
-        Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper(), count);
+    public Collection<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
+        final Collection<String> params = new ArrayList<>();
+        String sql = "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join likes l on f.id = l.film_id " +
+                "left join film_mpas fm on f.id = fm.film_id left join mpas m on fm.mpa_id = m.id " +
+                "left join film_genres fg on f.id = fg.film_id %s group by f.name, f.id order by count(l.film_id) desc limit ?";
+
+        if (Objects.nonNull(genreId)) {
+            params.add(String.format("genre_id = %s", genreId));
+        }
+
+        if (Objects.nonNull(year)) {
+            params.add(String.format("YEAR(release_date) = %s", year));
+        }
+
+        final String genreAndYearParams = !params.isEmpty() ? "where ".concat(String.join(" and ", params)) : "";
+        Collection<Film> films = jdbcTemplate.query(String.format(sql, genreAndYearParams), new FilmMapper(), count);
 
         return setFilmGenresAndDirectors(films);
     }
@@ -114,28 +123,28 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> getDirectorFilms(Integer directorId, SortBy sortBy) {
         String yearOrderSql = "select f.*, " +
-            "       m.id mpa_id, " +
-            "       m.name mpa_name " +
-            "from film_directors fd " +
-            "         join films f on f.id = fd.film_id " +
-            "         join film_mpas fm on f.id = fm.film_id " +
-            "         join mpas m on fm.mpa_id = m.id " +
-            "where director_id = ? " +
-            "order by year(f.release_date) asc";
+                "       m.id mpa_id, " +
+                "       m.name mpa_name " +
+                "from film_directors fd " +
+                "         join films f on f.id = fd.film_id " +
+                "         join film_mpas fm on f.id = fm.film_id " +
+                "         join mpas m on fm.mpa_id = m.id " +
+                "where director_id = ? " +
+                "order by year(f.release_date) asc";
 
         String likesOrderSql = "select f.*,  " +
-            "       m.id mpa_id,  " +
-            "       m.name mpa_name,  " +
-            "       (select count(*) from likes where fd.film_id = likes.film_id) as likes " +
-            "from film_directors fd " +
-            "join films f on f.id = fd.film_id " +
-            "join film_mpas fm on f.id = fm.film_id " +
-            "join mpas m on fm.mpa_id = m.id " +
-            "where director_id = ? " +
-            "order by likes desc;";
+                "       m.id mpa_id,  " +
+                "       m.name mpa_name,  " +
+                "       (select count(*) from likes where fd.film_id = likes.film_id) as likes " +
+                "from film_directors fd " +
+                "join films f on f.id = fd.film_id " +
+                "join film_mpas fm on f.id = fm.film_id " +
+                "join mpas m on fm.mpa_id = m.id " +
+                "where director_id = ? " +
+                "order by likes desc;";
 
         Collection<Film> films =
-            jdbcTemplate.query(sortBy == SortBy.likes ? likesOrderSql : yearOrderSql, new FilmMapper(), directorId);
+                jdbcTemplate.query(sortBy == SortBy.likes ? likesOrderSql : yearOrderSql, new FilmMapper(), directorId);
 
         if (films.isEmpty()) {
             throw new NotFoundException(String.format(DirectorErrorMessages.notFound, directorId));

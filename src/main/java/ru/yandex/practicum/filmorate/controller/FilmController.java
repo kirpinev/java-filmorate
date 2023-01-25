@@ -38,10 +38,12 @@ public class FilmController {
 
     @GetMapping("/popular")
     public Collection<Film> getPopularFilms(
-        @RequestParam(name = "count",
-            defaultValue = "10", required = false) Integer count
+            @RequestParam(name = "count",
+                    defaultValue = "10", required = false) Integer count,
+            @RequestParam(name = "genreId", required = false) Integer genreId,
+            @RequestParam(name = "year", required = false) Integer year
     ) {
-        return filmService.getPopularFilms(count);
+        return filmService.getPopularFilms(count, genreId, year);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -65,7 +67,7 @@ public class FilmController {
 
     @GetMapping("/director/{directorId}")
     public Collection<Film> getSortedFilms(
-        @PathVariable("directorId") Integer directorId, @RequestParam SortBy sortBy
+            @PathVariable("directorId") Integer directorId, @RequestParam SortBy sortBy
     ) {
         return filmService.getDirectorFilms(directorId, sortBy);
     }
