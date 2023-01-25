@@ -50,8 +50,8 @@ public class FilmService {
         likeService.deleteLikeFromFilm(filmId, user.getId());
     }
 
-    public Collection<Film> getPopularFilms(Integer count) {
-        return filmStorage.getPopularFilms(count);
+    public Collection<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
+        return filmStorage.getPopularFilms(count, genreId, year);
     }
 
     public Film getFilmById(Integer id) {
