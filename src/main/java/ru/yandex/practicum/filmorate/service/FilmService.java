@@ -62,6 +62,12 @@ public class FilmService {
         return film;
     }
 
+    public void deleteFilmById(Integer id) {
+        Film film = filmStorage.getFilmById(id);
+        checkFilmIsNotFound(film, id);
+        filmStorage.deleteFilmById(id);
+    }
+
     private void checkFilmIsNotFound(Film film, Integer id) {
         if (FilmValidator.isFilmNull(film)) {
             throw new NotFoundException(String.format(NOT_FOUND_FILM, id));

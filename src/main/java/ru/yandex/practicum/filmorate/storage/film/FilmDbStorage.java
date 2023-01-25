@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.filmMpa.FilmMpaStorage;
@@ -102,6 +103,12 @@ public class FilmDbStorage implements FilmStorage {
         Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper(), count);
 
         return setFilmGenres(films);
+    }
+
+    @Override
+    public void deleteFilmById(Integer id) {
+        final String sql = "delete from films where id = ?";
+            jdbcTemplate.update(sql, id);
     }
 
     private Collection<Film> setFilmGenres(Collection<Film> films) {
