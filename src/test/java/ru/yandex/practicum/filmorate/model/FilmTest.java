@@ -14,11 +14,11 @@ import java.util.Set;
 class FilmTest {
 
     private final Film film = Film.builder()
-            .name("nisi eiusmod")
-            .description("adipisicing")
-            .releaseDate(LocalDate.parse("1895-12-28").plusDays(1))
-            .duration(100)
-            .build();
+        .name("nisi eiusmod")
+        .description("adipisicing")
+        .releaseDate(LocalDate.parse("1895-12-28").plusDays(1))
+        .duration(100)
+        .build();
     private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
     private final Validator validator = validatorFactory.getValidator();
 
@@ -32,12 +32,12 @@ class FilmTest {
     @Test
     void shouldCreateFilmWithFirstFilmDate() {
         Film filmWithFirstFilmDate = film
-                .toBuilder()
-                .releaseDate(LocalDate.parse("1895-12-28"))
-                .build();
+            .toBuilder()
+            .releaseDate(LocalDate.parse("1895-12-28"))
+            .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(filmWithFirstFilmDate);
-        
+
         Assertions.assertTrue(violations.isEmpty());
     }
 
@@ -47,9 +47,9 @@ class FilmTest {
 
         Arrays.stream(names).forEach(name -> {
             Film filmWithIncorrectName = film
-                    .toBuilder()
-                    .name(name)
-                    .build();
+                .toBuilder()
+                .name(name)
+                .build();
 
             Set<ConstraintViolation<Film>> violations = validator.validate(filmWithIncorrectName);
 
@@ -60,9 +60,9 @@ class FilmTest {
     @Test
     void shouldNotCreateFilmIfDescriptionTooLong() {
         Film filmWithIncorrectDescription = film
-                .toBuilder()
-                .description("a".repeat(Film.FILM_DESCRIPTION_MAX_LENGTH + 1))
-                .build();
+            .toBuilder()
+            .description("a".repeat(Film.FILM_DESCRIPTION_MAX_LENGTH + 1))
+            .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(filmWithIncorrectDescription);
 
@@ -73,9 +73,9 @@ class FilmTest {
     @Test
     void shouldNotCreateFilmIfReleaseDateIsWrong() {
         Film filmWithIncorrectReleaseDate = film
-                .toBuilder()
-                .releaseDate(LocalDate.parse("1895-12-27"))
-                .build();
+            .toBuilder()
+            .releaseDate(LocalDate.parse("1895-12-27"))
+            .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(filmWithIncorrectReleaseDate);
 
@@ -86,9 +86,9 @@ class FilmTest {
     @Test
     void shouldNotCreateFilmIfDurationIsWrong() {
         Film filmWithIncorrectDuration = film
-                .toBuilder()
-                .duration(-100)
-                .build();
+            .toBuilder()
+            .duration(-100)
+            .build();
 
         Set<ConstraintViolation<Film>> violations = validator.validate(filmWithIncorrectDuration);
 

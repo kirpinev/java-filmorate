@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.constants.SortBy;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -10,14 +12,11 @@ import java.util.Collection;
 
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 @RequestMapping("/films")
 public class FilmController {
 
     private final FilmService filmService;
-
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
-    }
 
     @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) {
@@ -38,8 +37,10 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getPopularFilms(@RequestParam(name = "count",
-            defaultValue = "10", required = false) Integer count) {
+    public Collection<Film> getPopularFilms(
+        @RequestParam(name = "count",
+            defaultValue = "10", required = false) Integer count
+    ) {
         return filmService.getPopularFilms(count);
     }
 
@@ -60,5 +61,12 @@ public class FilmController {
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLikeFromFilm(@PathVariable("id") Integer id, @PathVariable("userId") Integer userId) {
         filmService.deleteLikeFromFilm(id, userId);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public Collection<Film> getSortedFilms(
+        @PathVariable("directorId") Integer directorId, @RequestParam SortBy sortBy
+    ) {
+        return filmService.getDirectorFilms(directorId, sortBy);
     }
 }

@@ -24,12 +24,12 @@ public class UserStorageTest {
 
     private final UserStorage userStorage;
     private final User user = new User()
-            .toBuilder()
-            .name("Игорь")
-            .login("pwned")
-            .birthday(LocalDate.now())
-            .email("igor@what.eng")
-            .build();
+        .toBuilder()
+        .name("Игорь")
+        .login("pwned")
+        .birthday(LocalDate.now())
+        .email("igor@what.eng")
+        .build();
 
     @Test
     public void createUser() {

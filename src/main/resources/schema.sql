@@ -102,17 +102,16 @@ create table if not exists review_ratings
 
 create table if not exists directors
 (
-    director_id int,
+    director_id int auto_increment,
     name        varchar(255) not null,
     primary key (director_id)
 );
 
 create table if not exists film_directors
 (
-    film_director_id int,
-    director_id      int,
-    film_id          int,
-    primary key (film_director_id),
+    director_id int,
+    film_id     int,
+    primary key (director_id, film_id),
     foreign key (director_id) references directors (director_id) on delete cascade,
     foreign key (film_id) references films (id) on delete cascade
 );

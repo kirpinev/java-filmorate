@@ -12,6 +12,6 @@ public class MpaValidator {
 
     public static boolean isMpaNotFound(Collection<Mpa> mpas, Mpa mpa) {
         return Objects.isNull(mpa) || Objects.isNull(mpas.stream()
-                .collect(Collectors.toMap(Mpa::getId, m -> m)).get(mpa.getId()));
+            .collect(Collectors.toMap(Mpa::getId, m -> m)).get(mpa.getId()));
     }
 }
