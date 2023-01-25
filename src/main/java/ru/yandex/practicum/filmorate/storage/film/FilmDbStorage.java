@@ -19,7 +19,6 @@ import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.sql.PreparedStatement;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -30,7 +29,7 @@ public class FilmDbStorage implements FilmStorage {
     private final MpaStorage mpaStorage;
     private final FilmGenreStorage filmGenreStorage;
     private final FilmDirectorStorage filmDirectorStorage;
-    private final String  filmsSql =
+    private final String filmsSql =
             "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join film_mpas fm on f.id = fm.film_id " +
                     "left join mpas m on fm.mpa_id = m.id";
 
@@ -102,26 +101,23 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
-        final String sql =
-                "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join likes l on f.id = l.film_id " +
-                        "left join film_mpas fm on f.id = fm.film_id " +
-                        "left join mpas m on fm.mpa_id = m.id group by f.name, f.id " +
-                        "order by count(l.film_id) desc limit ?";
-        Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper(), count);
-
-        films = setFilmGenresAndDirectors(films);
+        final Collection<String> params = new ArrayList<>();
+        String sql = "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join likes l on f.id = l.film_id " +
+                "left join film_mpas fm on f.id = fm.film_id left join mpas m on fm.mpa_id = m.id " +
+                "left join film_genres fg on f.id = fg.film_id %s group by f.name, f.id order by count(l.film_id) desc limit ?";
 
         if (Objects.nonNull(genreId)) {
-            films = films.stream()
-                    .filter(film -> film.getGenres().stream()
-                            .map(Genre::getId).collect(Collectors.toList()).contains(genreId)).collect(Collectors.toList());
+            params.add(String.format("genre_id = %s", genreId));
         }
 
         if (Objects.nonNull(year)) {
-            films = films.stream().filter(film -> film.getReleaseDate().getYear() == year).collect(Collectors.toList());
+            params.add(String.format("YEAR(release_date) = %s", year));
         }
 
-        return films;
+        final String genreAndYearParams = !params.isEmpty() ? "where ".concat(String.join(" and ", params)) : "";
+        Collection<Film> films = jdbcTemplate.query(String.format(sql, genreAndYearParams), new FilmMapper(), count);
+
+        return setFilmGenresAndDirectors(films);
     }
 
     @Override
