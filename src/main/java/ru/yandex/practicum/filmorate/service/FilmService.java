@@ -67,8 +67,6 @@ public class FilmService {
     }
 
     public void deleteFilmById(Integer id) {
-        Film film = filmStorage.getFilmById(id);
-        checkFilmIsNotFound(film, id);
         filmStorage.deleteFilmById(id);
     }
 

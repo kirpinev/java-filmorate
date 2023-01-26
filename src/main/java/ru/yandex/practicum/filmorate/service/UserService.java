@@ -38,8 +38,6 @@ public class UserService {
     }
 
     public void deleteUserById(Integer id) {
-        User user = userStorage.getUserById(id);
-        checkUserIsNotFound(user, id);
         userStorage.deleteUserById(id);
     }
 
