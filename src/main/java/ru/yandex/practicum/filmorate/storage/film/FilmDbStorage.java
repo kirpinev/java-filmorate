@@ -121,6 +121,18 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public Collection<Film> getCommonFilms(Integer userId, Integer friendId) {
+        String sql = "select * from (select f.*, m.id as mpa_id, m.name as mpa_name from films f " +
+                "left join likes l on f.id = l.film_id left join film_mpas fm on f.id = fm.film_id " +
+                "left join mpas m on fm.mpa_id = m.id left join film_genres fg on f.id = fg.film_id " +
+                "group by f.name, f.id order by count(l.film_id)) f, likes l1, likes l2 " +
+                "where f.id = l1.film_id and f.id = l2.film_id and l1.user_id = ? and l2.user_id = ?";
+        Collection<Film> films = jdbcTemplate.query(sql, new FilmMapper(), userId, friendId);
+
+        return setFilmGenresAndDirectors(films);
+    }
+
+    @Override
     public Collection<Film> getDirectorFilms(Integer directorId, SortBy sortBy) {
         String yearOrderSql = "select f.*, " +
                 "       m.id mpa_id, " +

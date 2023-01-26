@@ -62,6 +62,10 @@ public class FilmService {
         return film;
     }
 
+    public Collection<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
+    }
+
     private void checkFilmIsNotFound(Film film, Integer id) {
         if (FilmValidator.isFilmNull(film)) {
             throw new NotFoundException(String.format(NOT_FOUND_FILM, id));

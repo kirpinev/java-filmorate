@@ -26,8 +26,8 @@ public class UserDbStorage implements UserStorage {
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
-                sql,
-                new String[] {"id"}
+                    sql,
+                    new String[]{"id"}
             );
             preparedStatement.setString(1, user.getName());
             preparedStatement.setString(2, user.getLogin());
@@ -48,8 +48,7 @@ public class UserDbStorage implements UserStorage {
     public User getUserById(Integer userId) {
         try {
             return jdbcTemplate.queryForObject(usersSql.concat(" where id = ?"), new UserMapper(), userId);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return null;
         }
     }
@@ -64,8 +63,8 @@ public class UserDbStorage implements UserStorage {
         final String sql = "update users set name = ?, login = ?, birthday = ?, email = ? where id = ?";
 
         jdbcTemplate.update(
-            sql,
-            user.getName(), user.getLogin(), user.getBirthday(), user.getEmail(), user.getId()
+                sql,
+                user.getName(), user.getLogin(), user.getBirthday(), user.getEmail(), user.getId()
         );
 
         return user;
@@ -74,7 +73,7 @@ public class UserDbStorage implements UserStorage {
     @Override
     public Collection<User> getUserFriends(Integer userId) {
         final String sql = "select * from users where id in (select f.friend_id from users u join friendships f " +
-            "on u.id = f.user_id where u.id = ?)";
+                "on u.id = f.user_id where u.id = ?)";
 
         return jdbcTemplate.query(sql, new UserMapper(), userId);
     }
@@ -82,8 +81,8 @@ public class UserDbStorage implements UserStorage {
     @Override
     public Collection<User> getCommonFriends(Integer user1Id, Integer user2Id) {
         final String sql = "select * from users where id in (select friend_id from users u join friendships f on " +
-            "u.id = f.user_id where u.id = ?) and id in (select friend_id from users u join friendships f on " +
-            "u.id = f.user_id where u.id = ?)";
+                "u.id = f.user_id where u.id = ?) and id in (select friend_id from users u join friendships f on " +
+                "u.id = f.user_id where u.id = ?)";
 
         return jdbcTemplate.query(sql, new UserMapper(), user1Id, user2Id);
     }
