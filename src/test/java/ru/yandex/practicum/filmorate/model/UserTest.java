@@ -14,12 +14,12 @@ import java.util.Set;
 class UserTest {
 
     private final User user = User
-            .builder()
-            .login("a_b")
-            .name("Nick Name")
-            .email("mail@mail.ru")
-            .birthday(LocalDate.now())
-            .build();
+        .builder()
+        .login("a_b")
+        .name("Nick Name")
+        .email("mail@mail.ru")
+        .birthday(LocalDate.now())
+        .build();
     private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
     private final Validator validator = validatorFactory.getValidator();
 
@@ -36,9 +36,9 @@ class UserTest {
 
         Arrays.stream(logins).forEach(login -> {
             User userWithIncorrectLogin = user
-                    .toBuilder()
-                    .login(login)
-                    .build();
+                .toBuilder()
+                .login(login)
+                .build();
 
             Set<ConstraintViolation<User>> violations = validator.validate(userWithIncorrectLogin);
 
@@ -49,15 +49,15 @@ class UserTest {
     @Test
     void shouldNotCreateUserIfEmailIsWrong() {
         String[] emails = {"user @domain.com", ".user@domain.co.in", "@domain.com", "user?name@doma in.co.in",
-                "@domain.com",
-                "",
-                null};
+            "@domain.com",
+            "",
+            null};
 
         Arrays.stream(emails).forEach(email -> {
             User userWithIncorrectEmail = user
-                    .toBuilder()
-                    .email(email)
-                    .build();
+                .toBuilder()
+                .email(email)
+                .build();
 
             Set<ConstraintViolation<User>> violations = validator.validate(userWithIncorrectEmail);
 
@@ -68,9 +68,9 @@ class UserTest {
     @Test
     void shouldNotCreateUserIfBirthdayIsWrong() {
         User userWithIncorrectBirthday = user
-                .toBuilder()
-                .birthday(LocalDate.now().plusDays(1))
-                .build();
+            .toBuilder()
+            .birthday(LocalDate.now().plusDays(1))
+            .build();
 
         Set<ConstraintViolation<User>> violations = validator.validate(userWithIncorrectBirthday);
 
