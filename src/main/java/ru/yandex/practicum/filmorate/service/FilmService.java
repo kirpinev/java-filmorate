@@ -40,6 +40,10 @@ public class FilmService {
         return filmStorage.getDirectorFilms(directorId, sortBy);
     }
 
+    public Collection<Film> getRecommendations(Integer userId) {
+        return filmStorage.getUserRecommendations(userId);
+    }
+
     public void addLikeToFilm(Integer filmId, Integer userId) {
         likeService.addLikeToFilm(filmId, userId);
     }

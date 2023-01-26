@@ -153,6 +153,40 @@ public class FilmDbStorage implements FilmStorage {
         return setFilmGenresAndDirectors(films);
     }
 
+    @Override
+    public Collection<Film> getUserRecommendations(Integer userId) {
+        String sql = "SELECT l.user_id " +
+                "FROM likes AS l " +
+                "WHERE l.film_id IN " +
+                "(SELECT film_id " +
+                "FROM likes l1 " +
+                "WHERE user_id = ?) and l.user_id <> ?" +
+                "GROUP BY l.user_id " +
+                "ORDER BY COUNT(l.film_id) " +
+                "limit 1";
+
+        final List<Integer> userIds = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("user_id"), userId, userId);
+
+        if (userIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        int similarUserId = userIds.get(0);
+
+        String filmsFromUser = "SELECT f.*, m.id AS mpa_id, m.name AS mpa_name " +
+                "FROM films AS f LEFT JOIN film_mpas AS fm ON f.id = fm.film_id " +
+                "LEFT JOIN mpas AS m ON fm.mpa_id = m.id " +
+                "LEFT JOIN likes AS l ON f.id = l.film_id " +
+                "WHERE l.user_id = ?";
+
+        List<Film> userFilms = jdbcTemplate.query(filmsFromUser, new FilmMapper(), userId);
+        List<Film> similarUserFilms = jdbcTemplate.query(filmsFromUser, new FilmMapper(), similarUserId);
+
+        similarUserFilms.removeAll(userFilms);
+
+        return setFilmGenresAndDirectors(similarUserFilms);
+    }
+
     private Collection<Film> setFilmGenresAndDirectors(Collection<Film> films) {
         Map<Integer, Collection<Genre>> filmGenresMap = filmGenreStorage.getAllFilmGenres(films);
         Map<Integer, Collection<Director>> filmDirectorsMap = filmDirectorStorage.getFilmDirectors(films);
