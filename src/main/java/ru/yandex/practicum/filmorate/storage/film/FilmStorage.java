@@ -20,4 +20,6 @@ public interface FilmStorage {
     Collection<Film> getCommonFilms(Integer userId, Integer friendId);
 
     Collection<Film> getDirectorFilms(Integer directorId, SortBy sortBy);
+
+    Collection<Film> getUserRecommendations(Integer userId);
 }
