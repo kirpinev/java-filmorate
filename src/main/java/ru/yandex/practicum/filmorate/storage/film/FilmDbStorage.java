@@ -140,7 +140,6 @@ public class FilmDbStorage implements FilmStorage {
             jdbcTemplate.update(sql, id);
     }
 
-    private Collection<Film> setFilmGenres(Collection<Film> films) {
     @Override
     public Collection<Film> getDirectorFilms(Integer directorId, SortBy sortBy) {
         String yearOrderSql = "select f.*, " +

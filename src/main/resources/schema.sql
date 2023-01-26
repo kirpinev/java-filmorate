@@ -1,12 +1,3 @@
--- drop table if exists genres;
-
-drop table if exists friendships;
--- drop table if exists mpas;
-drop table if exists films;
-drop table if exists likes;
-drop table if exists film_genres;
-drop table if exists film_mpas;
-drop table if exists users;
 
 create table if not exists genres
 (
