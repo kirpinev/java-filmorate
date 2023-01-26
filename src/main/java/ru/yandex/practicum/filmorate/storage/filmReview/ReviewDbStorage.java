@@ -20,6 +20,8 @@ public class ReviewDbStorage implements ReviewStorage {
     private static final String GET_REVIEW_BASE_QUERY =
             "SELECT review_id, film_id, user_id, useful, is_positive, content FROM reviews ";
 
+    private static final String GET_ALL_REVIEWS = GET_REVIEW_BASE_QUERY + " ORDER BY review_id";
+
     private static final String GET_REVIEW_BY_ID_QUERY =
             GET_REVIEW_BASE_QUERY + " WHERE review_id = ?";
 
@@ -28,6 +30,9 @@ public class ReviewDbStorage implements ReviewStorage {
 
     private static final String SAVE_REVIEW_QUERY =
             "INSERT INTO reviews (film_id, user_id, useful, is_positive, content) VALUES (?, ?, ?, ?, ?)";
+
+    private static final String UPDATE_REVIEW_QUERY =
+            "UPDATE reviews SET film_id = ?, user_id = ?, useful = ?, is_positive = ?, content = ?) WHERE review_id = ?";
 
     private static final String DELETE_REVIEW_BY_ID_QUERY =
             "DELETE FROM reviews WHERE review_id = ?";
@@ -68,7 +73,15 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Review update(Review filmReview) {
-        return null;
+        template.update(UPDATE_REVIEW_QUERY,
+                filmReview.getFilmId(),
+                filmReview.getUserId(),
+                filmReview.getUseful(),
+                filmReview.getIsPositive(),
+                filmReview.getContent(),
+                filmReview.getId()
+        );
+        return getById(filmReview.getId());
     }
 
     @Override
@@ -83,12 +96,12 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public List<Review> getByFilmId(Integer id) {
-        return null;
+        return template.query(GET_REVIEW_BY_FILM_ID_QUERY, this::mapRowToReview, id);
     }
 
     @Override
     public List<Review> getAll() {
-        return null;
+        return template.query(GET_ALL_REVIEWS, this::mapRowToReview);
     }
 
     @Override
