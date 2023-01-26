@@ -87,4 +87,5 @@ public class UserDbStorage implements UserStorage {
 
         return jdbcTemplate.query(sql, new UserMapper(), user1Id, user2Id);
     }
+
 }

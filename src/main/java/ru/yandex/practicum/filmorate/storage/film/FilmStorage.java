@@ -18,4 +18,6 @@ public interface FilmStorage {
     Collection<Film> getPopularFilms(Integer count);
 
     Collection<Film> getDirectorFilms(Integer directorId, SortBy sortBy);
+
+    Collection<Film> getUserRecommendations(Integer userId);
 }
