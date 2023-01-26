@@ -11,9 +11,9 @@ public class MpaMapper implements RowMapper<Mpa> {
     @Override
     public Mpa mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new Mpa()
-                .toBuilder()
-                .id(rs.getInt("id"))
-                .name(rs.getString("name"))
-                .build();
+            .toBuilder()
+            .id(rs.getInt("id"))
+            .name(rs.getString("name"))
+            .build();
     }
 }

@@ -29,15 +29,15 @@ public class FilmStorageTest {
 
     private final FilmStorage filmStorage;
     private final Film film = new Film()
-            .toBuilder()
-            .name("Фильм")
-            .description("Интересный")
-            .releaseDate(LocalDate.now())
-            .duration(100)
-            .mpa(new Mpa(1, null))
-            .rate(5)
-            .genres(List.of(new Genre(1, null)))
-            .build();
+        .toBuilder()
+        .name("Фильм")
+        .description("Интересный")
+        .releaseDate(LocalDate.now())
+        .duration(100)
+        .mpa(new Mpa(1, null))
+        .rate(5)
+        .genres(List.of(new Genre(1, null)))
+        .build();
     private Film newFilm;
 
     @BeforeEach

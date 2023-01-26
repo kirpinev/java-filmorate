@@ -63,7 +63,7 @@ create table if not exists film_genres
     genre_id int,
     foreign key (film_id) references films (id) on delete cascade,
     foreign key (genre_id) references genres (id) on delete cascade,
-    primary key(film_id, genre_id)
+    primary key (film_id, genre_id)
 );
 
 create table if not exists film_mpas
@@ -73,4 +73,55 @@ create table if not exists film_mpas
     foreign key (mpa_id) references mpas (id) on delete cascade,
     foreign key (film_id) references films (id) on delete cascade,
     primary key (mpa_id, film_id)
+);
+
+create table if not exists feed
+(
+    event_id   int,
+    user_id    int,
+    timestamp  timestamp   not null,
+    event_type varchar(10) not null,
+    operation  varchar(10) not null,
+    entity_id  int         not null,
+    foreign key (user_id) references users (id) on delete cascade,
+    primary key (event_id)
+);
+
+create table if not exists reviews
+(
+    review_id   int,
+    content     varchar(255) not null,
+    is_positive boolean      not null,
+    useful      int default 0,
+    user_id     int,
+    film_id     int,
+    primary key (review_id),
+    foreign key (user_id) references users (id) on delete cascade,
+    foreign key (film_id) references films (id) on delete cascade
+);
+
+create table if not exists review_ratings
+(
+    user_id     int,
+    review_id   int,
+    is_positive boolean not null,
+    primary key (user_id, review_id),
+    foreign key (user_id) references users (id) on delete cascade,
+    foreign key (review_id) references reviews (review_id) on delete cascade
+);
+
+create table if not exists directors
+(
+    director_id int auto_increment,
+    name        varchar(255) not null,
+    primary key (director_id)
+);
+
+create table if not exists film_directors
+(
+    director_id int,
+    film_id     int,
+    primary key (director_id, film_id),
+    foreign key (director_id) references directors (director_id) on delete cascade,
+    foreign key (film_id) references films (id) on delete cascade
 );

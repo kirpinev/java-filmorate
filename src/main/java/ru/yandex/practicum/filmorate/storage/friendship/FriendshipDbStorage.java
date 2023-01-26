@@ -1,18 +1,14 @@
 package ru.yandex.practicum.filmorate.storage.friendship;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-@Qualifier("FriendshipDbStorage")
+@RequiredArgsConstructor
 public class FriendshipDbStorage implements FriendshipStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public FriendshipDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public void addFriend(Integer userId, Integer friendId) {
