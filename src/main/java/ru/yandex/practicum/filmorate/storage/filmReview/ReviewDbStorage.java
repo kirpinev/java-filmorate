@@ -19,10 +19,19 @@ public class ReviewDbStorage implements ReviewStorage {
     private final JdbcTemplate template;
     private static final String GET_REVIEW_BASE_QUERY =
             "SELECT review_id, film_id, user_id, useful, is_positive, content FROM reviews ";
+
     private static final String GET_REVIEW_BY_ID_QUERY =
             GET_REVIEW_BASE_QUERY + " WHERE review_id = ?";
+
+    private static final String GET_REVIEW_BY_FILM_ID_QUERY =
+            GET_REVIEW_BASE_QUERY + " WHERE film_id = ? ORDER BY review_id";
+
     private static final String SAVE_REVIEW_QUERY =
             "INSERT INTO reviews (film_id, user_id, useful, is_positive, content) VALUES (?, ?, ?, ?, ?)";
+
+    private static final String DELETE_REVIEW_BY_ID_QUERY =
+            "DELETE FROM reviews WHERE review_id = ?";
+
     private static final String CHECK_REVIEW_EXISTS_BY_ID_QUERY =
             "SELECT EXISTS(SELECT review_id FROM reviews WHERE review_id = ?) isExists";
 
@@ -63,8 +72,8 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
-    public Review delete(Integer id) {
-        return null;
+    public void delete(Integer id) {
+        template.update(DELETE_REVIEW_BY_ID_QUERY, id);
     }
 
     @Override

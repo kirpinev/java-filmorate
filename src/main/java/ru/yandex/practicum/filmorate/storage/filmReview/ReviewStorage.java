@@ -8,7 +8,7 @@ public interface ReviewStorage {
 
     Review add(Review filmReview);
     Review update(Review filmReview);
-    Review delete(Integer id);
+    void delete(Integer id);
     Review getById(Integer id);
     List<Review> getByFilmId(Integer id);
     List<Review> getAll();

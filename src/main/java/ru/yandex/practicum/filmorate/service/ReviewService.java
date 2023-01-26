@@ -76,15 +76,14 @@ public class ReviewService {
         return reviewStorage.update(filmReview);
     }
 
-    public Review delete(Integer id) {
+    public void delete(Integer id) {
         log.debug("Удаление отзыва с id = {}", id);
         if (!reviewStorage.isExists(id)) {
             log.warn("Отзыв не обнаружен");
             throw new NotFoundException("ID отзыва указан некорректно");
         }
-        Review review = reviewStorage.delete(id);
-        log.trace("Удалён отзыв: {}", review);
-        return review;
+        reviewStorage.delete(id);
+        log.trace("Удалён отзыв с id = {}", id);
     }
 
     private void performChecks(Review filmReview) {

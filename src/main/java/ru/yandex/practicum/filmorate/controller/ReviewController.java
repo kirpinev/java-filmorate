@@ -32,8 +32,8 @@ public class ReviewController {
     }
 
     @DeleteMapping("/{id}")
-    public Review delete(@PathVariable("id") Integer id) {
-        return reviewService.delete(id);
+    public void delete(@PathVariable("id") Integer id) {
+        reviewService.delete(id);
     }
 
     @GetMapping
