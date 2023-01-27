@@ -67,10 +67,10 @@ public class ReviewService {
     }
 
     public Review update(Review filmReview) {
-        log.debug("Обновление фильма: {}", filmReview);
+        log.debug("Обновление отзыва: {}", filmReview);
         if (filmService.getFilmById(filmReview.getFilmId()) == null) {
             log.warn("Не обнаружен фильм с id = {}", filmReview.getFilmId());
-            throw new NotFoundException("Фильм указан некорректно");
+            throw new NotFoundException("Фильм в отзыве указан некорректно");
         }
         performChecks(filmReview);
         return reviewStorage.update(filmReview);

@@ -79,9 +79,9 @@ public class ReviewDbStorage implements ReviewStorage {
                 filmReview.getUseful(),
                 filmReview.getIsPositive(),
                 filmReview.getContent(),
-                filmReview.getId()
+                filmReview.getReviewId()
         );
-        return getById(filmReview.getId());
+        return getById(filmReview.getReviewId());
     }
 
     @Override
@@ -113,7 +113,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     private Review mapRowToReview(ResultSet rs, int rowNum) throws SQLException {
         return Review.builder()
-                .id(rs.getInt("review_id"))
+                .reviewId(rs.getInt("review_id"))
                 .filmId(rs.getInt("film_id"))
                 .userId(rs.getInt("user_id"))
                 .useful(rs.getInt("useful"))
