@@ -92,13 +92,20 @@ public class ReviewService {
             log.warn("Ошибка проверки значений текста отзыва");
             throw new ReviewValidationException("Текст отзыва заполнен некорректно");
         }
-        if (userService.getUserById(filmReview.getUserId()) == null) {
+        if (filmReview.getUserId() == null || userService.getUserById(filmReview.getUserId()) == null) {
             log.warn("Не обнаружен пользователь с id = {}", filmReview.getUserId());
-            throw new NotFoundException("Данные о пользователе заполнены некорректно");
+            throw new ReviewValidationException("Данные о пользователе заполнены некорректно");
         }
-        if (filmService.getFilmById(filmReview.getFilmId()) == null) {
+        if (filmReview.getFilmId() == null || filmService.getFilmById(filmReview.getFilmId()) == null) {
             log.warn("Не обнаружен фильм с id = {}", filmReview.getFilmId());
-            throw new NotFoundException("Данные о фильме заполнены некорректно");
+            throw new ReviewValidationException("Данные о фильме заполнены некорректно");
+        }
+        if (filmReview.getIsPositive() == null) {
+            log.warn("Ошибка проверки значения типа отзыва");
+            throw new ReviewValidationException("Данные о типе отзыва заполнены некорректно");
+        }
+        if (filmReview.getUseful() == null) {
+            filmReview.setUseful(0);
         }
         log.debug("Проверки пройдены успешно");
     }
