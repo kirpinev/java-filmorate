@@ -32,7 +32,7 @@ public class ReviewDbStorage implements ReviewStorage {
             "INSERT INTO reviews (film_id, user_id, useful, is_positive, content) VALUES (?, ?, ?, ?, ?)";
 
     private static final String UPDATE_REVIEW_QUERY =
-            "UPDATE reviews SET film_id = ?, user_id = ?, useful = ?, is_positive = ?, content = ?) WHERE review_id = ?";
+            "UPDATE reviews SET useful = ?, is_positive = ?, content = ? WHERE review_id = ?";
 
     private static final String DELETE_REVIEW_BY_ID_QUERY =
             "DELETE FROM reviews WHERE review_id = ?";
@@ -74,8 +74,6 @@ public class ReviewDbStorage implements ReviewStorage {
     @Override
     public Review update(Review filmReview) {
         template.update(UPDATE_REVIEW_QUERY,
-                filmReview.getFilmId(),
-                filmReview.getUserId(),
                 filmReview.getUseful(),
                 filmReview.getIsPositive(),
                 filmReview.getContent(),
