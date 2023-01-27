@@ -37,7 +37,13 @@ public class UserService {
         return user;
     }
 
+    public void deleteUserById(Integer id) {
+        userStorage.deleteUserById(id);
+    }
+
     public Collection<User> getUserFriends(Integer id) {
+        User user = userStorage.getUserById(id);
+        checkUserIsNotFound(user, id);
         return userStorage.getUserFriends(id);
     }
 

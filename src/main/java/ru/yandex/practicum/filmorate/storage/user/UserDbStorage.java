@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.PreparedStatement;
@@ -87,4 +88,12 @@ public class UserDbStorage implements UserStorage {
         return jdbcTemplate.query(sql, new UserMapper(), user1Id, user2Id);
     }
 
+    @Override
+    public void deleteUserById(Integer id) {
+        final String sql = "delete from users where id = ?";
+        int status = jdbcTemplate.update(sql, id);
+        if (status == 0) {
+            throw new NotFoundException("пользователя с id " + id + " нет");
+        }
+    }
 }

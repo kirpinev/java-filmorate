@@ -22,4 +22,6 @@ public interface FilmStorage {
     Collection<Film> getDirectorFilms(Integer directorId, SortBy sortBy);
 
     Collection<Film> getUserRecommendations(Integer userId);
+
+    void deleteFilmById(Integer id);
 }
