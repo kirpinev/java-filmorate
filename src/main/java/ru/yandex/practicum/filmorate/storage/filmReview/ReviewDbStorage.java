@@ -17,16 +17,17 @@ import java.util.List;
 public class ReviewDbStorage implements ReviewStorage {
 
     private final JdbcTemplate template;
+
     private static final String GET_REVIEW_BASE_QUERY =
             "SELECT review_id, film_id, user_id, useful, is_positive, content FROM reviews ";
 
-    private static final String GET_ALL_REVIEWS = GET_REVIEW_BASE_QUERY + " ORDER BY review_id";
+    private static final String GET_ALL_REVIEWS = GET_REVIEW_BASE_QUERY + " ORDER BY useful DESC";
 
     private static final String GET_REVIEW_BY_ID_QUERY =
             GET_REVIEW_BASE_QUERY + " WHERE review_id = ?";
 
     private static final String GET_REVIEW_BY_FILM_ID_QUERY =
-            GET_REVIEW_BASE_QUERY + " WHERE film_id = ? ORDER BY review_id";
+            GET_REVIEW_BASE_QUERY + " WHERE film_id = ? ORDER BY useful DESC";
 
     private static final String SAVE_REVIEW_QUERY =
             "INSERT INTO reviews (film_id, user_id, useful, is_positive, content) VALUES (?, ?, ?, ?, ?)";
@@ -66,7 +67,6 @@ public class ReviewDbStorage implements ReviewStorage {
             log.warn("Ошибка при получении id записываемого в БД отзыва {}: {}", review, e.getMessage());
             throw e;
         }
-        log.debug("Отзыв записан с id = {}", savedReviewId);
 
         return getById(savedReviewId);
     }
