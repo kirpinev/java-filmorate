@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -56,13 +57,11 @@ public class ReviewDbStorage implements ReviewStorage {
             return smt;
         }, holder);
 
-        try {
-            savedReviewId = holder.getKey().intValue();
-        } catch (NullPointerException e) {
-            log.warn("Ошибка при получении id записываемого в БД отзыва {}: {}", review, e.getMessage());
-            throw e;
+        if (holder.getKeyList().size() == 0) {
+            log.warn("Ошибка при получении id записываемого в БД отзыва {}, БД вернула пустой результат", review);
+            throw new RuntimeException("Запись отзыва в БД не удалась");
         }
-
+        int savedReviewId = Objects.requireNonNull(holder.getKey()).intValue();
         return getById(savedReviewId);
     }
 
