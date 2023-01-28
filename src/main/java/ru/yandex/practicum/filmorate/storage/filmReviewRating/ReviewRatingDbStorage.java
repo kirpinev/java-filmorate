@@ -5,15 +5,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 @Slf4j
 @RequiredArgsConstructor
 @Component("ReviewRatingDbStorage")
 public class ReviewRatingDbStorage implements ReviewRatingStorage {
 
     private final JdbcTemplate template;
+    private final ReviewRatingMapper reviewRatingMapper;
 
     private static final String MERGE_REVIEW_RATING_QUERY =
             "MERGE INTO review_ratings (review_id, user_id, is_positive) VALUES (?, ?, ?)";
@@ -63,11 +61,7 @@ public class ReviewRatingDbStorage implements ReviewRatingStorage {
     }
 
     private Integer getReviewUsefulScore (Integer reviewId) {
-        return template.queryForObject(GET_REVIEW_USEFUL_SCORE_ON_REVIEW_ID, this::mapScore, reviewId);
-    }
-
-    private Integer mapScore (ResultSet rs, int rowNum) throws SQLException {
-        return rs.getInt("useful");
+        return template.queryForObject(GET_REVIEW_USEFUL_SCORE_ON_REVIEW_ID, reviewRatingMapper, reviewId);
     }
 
 }

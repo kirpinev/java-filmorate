@@ -8,8 +8,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Review;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
@@ -19,6 +17,7 @@ import java.util.Objects;
 public class ReviewDbStorage implements ReviewStorage {
 
     private final JdbcTemplate template;
+    private final ReviewMapper reviewMapper;
 
     private static final String GET_REVIEW_BASE_QUERY =
             "SELECT review_id, film_id, user_id, useful, is_positive, content FROM reviews ";
@@ -83,17 +82,17 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Review getById(Integer id) {
-        return template.queryForObject(GET_REVIEW_BY_ID_QUERY, this::mapRowToReview, id);
+        return template.queryForObject(GET_REVIEW_BY_ID_QUERY, reviewMapper, id);
     }
 
     @Override
     public List<Review> getByFilmId(Integer id) {
-        return template.query(GET_REVIEW_BY_FILM_ID_QUERY, this::mapRowToReview, id);
+        return template.query(GET_REVIEW_BY_FILM_ID_QUERY, reviewMapper, id);
     }
 
     @Override
     public List<Review> getAll() {
-        return template.query(GET_ALL_REVIEWS, this::mapRowToReview);
+        return template.query(GET_ALL_REVIEWS, reviewMapper);
     }
 
     @Override
@@ -103,15 +102,5 @@ public class ReviewDbStorage implements ReviewStorage {
         ));
     }
 
-    private Review mapRowToReview(ResultSet rs, int rowNum) throws SQLException {
-        return Review.builder()
-                .reviewId(rs.getInt("review_id"))
-                .filmId(rs.getInt("film_id"))
-                .userId(rs.getInt("user_id"))
-                .useful(rs.getInt("useful"))
-                .isPositive(rs.getBoolean("is_positive"))
-                .content(rs.getString("content"))
-                .build();
-    }
 
 }
