@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.filmReview;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Slf4j
+@RequiredArgsConstructor
 @Component("ReviewDbStorage")
 public class ReviewDbStorage implements ReviewStorage {
 
@@ -41,15 +42,9 @@ public class ReviewDbStorage implements ReviewStorage {
     private static final String CHECK_REVIEW_EXISTS_BY_ID_QUERY =
             "SELECT EXISTS(SELECT review_id FROM reviews WHERE review_id = ?) isExists";
 
-    @Autowired
-    public ReviewDbStorage(JdbcTemplate template) {
-        this.template = template;
-    }
-
     @Override
     public Review add(Review review) {
         KeyHolder holder = new GeneratedKeyHolder();
-        int savedReviewId;
 
         template.update(conn -> {
             PreparedStatement smt = conn.prepareStatement(SAVE_REVIEW_QUERY, new String[] {"review_id"});

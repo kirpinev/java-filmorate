@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.filmReviewRating;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -9,10 +9,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Slf4j
+@RequiredArgsConstructor
 @Component("ReviewRatingDbStorage")
 public class ReviewRatingDbStorage implements ReviewRatingStorage {
 
-    JdbcTemplate template;
+    private final JdbcTemplate template;
 
     private static final String MERGE_REVIEW_RATING_QUERY =
             "MERGE INTO review_ratings (review_id, user_id, is_positive) VALUES (?, ?, ?)";
@@ -25,11 +26,6 @@ public class ReviewRatingDbStorage implements ReviewRatingStorage {
 
     private static final String UPDATE_REVIEW_USEFUL_SCORE_ON_USEFUL_SCORE_REVIEW_ID =
             "UPDATE reviews SET useful = ? WHERE review_id = ?";
-
-    @Autowired
-    public ReviewRatingDbStorage(JdbcTemplate template) {
-        this.template = template;
-    }
 
     @Override
     public void addLikeToFilmReview(Integer reviewId, Integer userId) {

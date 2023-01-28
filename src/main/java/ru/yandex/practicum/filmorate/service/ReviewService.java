@@ -1,8 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ReviewValidationException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -14,27 +13,15 @@ import ru.yandex.practicum.filmorate.storage.filmReviewRating.ReviewRatingStorag
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
 @Slf4j
+@RequiredArgsConstructor
+@Service
 public class ReviewService {
 
-    ReviewStorage reviewStorage;
-    UserService userService;
-    FilmService filmService;
-    ReviewRatingStorage reviewLikeStorage;
-
-    @Autowired
-    public ReviewService(
-            @Qualifier("ReviewDbStorage") ReviewStorage reviewStorage,
-            UserService userService,
-            FilmService filmService,
-            @Qualifier("ReviewRatingDbStorage") ReviewRatingStorage reviewLikeStorage
-    ) {
-        this.reviewStorage = reviewStorage;
-        this.userService = userService;
-        this.filmService = filmService;
-        this.reviewLikeStorage = reviewLikeStorage;
-    }
+    private final ReviewStorage reviewStorage;
+    private final UserService userService;
+    private final FilmService filmService;
+    private final ReviewRatingStorage reviewLikeStorage;
 
     public Review getById(Integer id) {
         log.debug("Запрошен отзыв с id = {}", id);
