@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.storage.filmReview.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.filmReviewRating.ReviewRatingStorage;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -28,10 +29,7 @@ public class ReviewService {
 
     public Review getById(Integer id) {
         log.debug("Запрошен отзыв с id = {}", id);
-        checkIfReviewExists(id);
-        Review review = reviewStorage.getById(id);
-        log.trace("Получен отзыв: {}", review);
-        return review;
+        return checkIfReviewExists(id);
     }
 
     public List<Review> getAll(Integer filmId, Integer count) {
@@ -75,11 +73,10 @@ public class ReviewService {
 
     public void delete(Integer id) {
         log.debug("Удаление отзыва с id = {}", id);
-        checkIfReviewExists(id);
-        Review review = reviewStorage.getById(id);
-        eventService.createEvent(review.getUserId(), EventType.REVIEW, EventOperation.REMOVE, review.getReviewId());
+        Review review = checkIfReviewExists(id);
         reviewStorage.delete(id);
         log.debug("Удалён отзыв с id = {}", id);
+        eventService.createEvent(review.getUserId(), EventType.REVIEW, EventOperation.REMOVE, review.getReviewId());
     }
 
     public void addLikeToFilmReview(Integer reviewId, Integer userId) {
@@ -148,10 +145,8 @@ public class ReviewService {
         log.debug("Проверки пройдены успешно");
     }
 
-    private void checkIfReviewExists (Integer reviewId) {
-        if (!reviewStorage.isExists(reviewId)) {
-            log.warn("Отзыв с id = {} не обнаружен", reviewId);
-            throw new NotFoundException("Отзыв не обнаружен");
-        }
+    private Review checkIfReviewExists (Integer reviewId) {
+        return Optional.ofNullable(reviewStorage.getById(reviewId))
+                .orElseThrow(() -> new NotFoundException("Отзыв не обнаружен"));
     }
 }
