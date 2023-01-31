@@ -1,15 +1,15 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.constants.SearchBy;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.constants.DirectorErrorMessages;
 import ru.yandex.practicum.filmorate.constants.SortBy;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -18,10 +18,11 @@ import ru.yandex.practicum.filmorate.storage.filmDirector.FilmDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.filmMpa.FilmMpaStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
-
 import java.sql.PreparedStatement;
 import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
@@ -34,6 +35,10 @@ public class FilmDbStorage implements FilmStorage {
     private final String filmsSql =
             "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join film_mpas fm on f.id = fm.film_id " +
                     "left join mpas m on fm.mpa_id = m.id";
+    private final String SEARCH_FILM_BASE_QUERY =
+            "SELECT DISTINCT films.id id FROM films " +
+                "LEFT JOIN film_directors on films.id = film_directors.film_id " +
+                "LEFT JOIN directors ON film_directors.director_id = directors.director_id ";
 
 
     @Override
@@ -214,7 +219,7 @@ public class FilmDbStorage implements FilmStorage {
         Map<Integer, Collection<Genre>> filmGenresMap = filmGenreStorage.getAllFilmGenres(films);
         Map<Integer, Collection<Director>> filmDirectorsMap = filmDirectorStorage.getFilmDirectors(films);
 
-        films.stream().forEach(film -> {
+        films.forEach(film -> {
             Integer filmId = film.getId();
 
             film.setGenres(filmGenresMap.getOrDefault(filmId, new ArrayList<>()));
@@ -223,7 +228,6 @@ public class FilmDbStorage implements FilmStorage {
 
         return films;
     }
-
 
     private Film addCredentials(Film film) {
         int filmId = film.getId();
@@ -240,4 +244,27 @@ public class FilmDbStorage implements FilmStorage {
 
         return film.toBuilder().mpa(filmMpa).genres(filmGenres).directors(directors).build();
     }
+
+    @Override
+    public Set<Film> search(String query, Set<SearchBy> searchFields) {
+
+        String searchQueryParameters = searchFields.stream()
+                .map(field -> "Lower(" + field.getSqlTableAndFieldName() + ") LIKE '%" + query.toLowerCase() + "%'")
+                .collect(Collectors.joining(" OR "));
+        String searchQuery = SEARCH_FILM_BASE_QUERY + " WHERE " + searchQueryParameters;
+        log.trace("Текст запроса поиска фильмов: {}", SEARCH_FILM_BASE_QUERY + searchQuery);
+
+        Set<Integer> filmIds = new HashSet<>(jdbcTemplate.query(searchQuery, (rs, rowNum) -> rs.getInt("id")));
+        log.trace("Получены следующие ID фильмов, подходящие под условия поиска: {}", filmIds);
+        Set<Film> films = getFilmsByIds(filmIds);
+        log.trace("Получен список фильмов по ID: {}", films);
+        return new HashSet<>(setFilmGenresAndDirectors(films));
+    }
+
+    private Set<Film> getFilmsByIds (Set<Integer> filmIds) {
+        String joinedFilmIds = filmIds.stream().map(x -> Integer.toString(x)).collect(Collectors.joining(","));
+        String searchQuery = String.format("%s WHERE f.id IN (%s)", filmsSql, joinedFilmIds);
+        return new HashSet<>(jdbcTemplate.query(searchQuery, new FilmMapper()));
+    }
+
 }
