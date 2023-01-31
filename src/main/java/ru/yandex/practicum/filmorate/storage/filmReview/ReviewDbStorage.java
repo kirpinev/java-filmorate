@@ -82,7 +82,10 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Review getById(Integer id) {
-        return template.queryForObject(GET_REVIEW_BY_ID_QUERY, reviewMapper, id);
+        return template.query(GET_REVIEW_BY_ID_QUERY, reviewMapper, id)
+                .stream()
+                .findAny()
+                .orElse(null);
     }
 
     @Override

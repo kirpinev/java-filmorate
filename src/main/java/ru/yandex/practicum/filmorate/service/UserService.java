@@ -2,8 +2,9 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.constants.EventOperation;
+import ru.yandex.practicum.filmorate.constants.EventType;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.friendship.FriendshipStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -18,6 +19,7 @@ public class UserService {
     private static final String NOT_FOUND_MESSAGE = "пользователя с id %s нет";
     private final UserStorage userStorage;
     private final FriendshipStorage friendshipStorage;
+    private final EventService eventService;
 
     public User createUser(User user) {
         setUserName(user);
@@ -62,10 +64,12 @@ public class UserService {
 
     public void addFriend(Integer userId, Integer friendId) {
         friendshipStorage.addFriend(userId, getUserById(friendId).getId());
+        eventService.createEvent(userId, EventType.FRIEND, EventOperation.ADD, friendId);
     }
 
     public void deleteFriend(Integer userId, Integer friendId) {
         friendshipStorage.deleteFriend(userId, friendId);
+        eventService.createEvent(userId, EventType.FRIEND, EventOperation.REMOVE, friendId);
     }
 
     private void checkUserIsNotFound(User user, Integer id) {
