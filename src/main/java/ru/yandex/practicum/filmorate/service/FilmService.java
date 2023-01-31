@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import java.util.Collection;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FilmService {
