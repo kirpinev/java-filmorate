@@ -90,9 +90,9 @@ create table if not exists film_mpas
 
 create table if not exists feed
 (
-    event_id   int,
+    event_id   int auto_increment,
     user_id    int,
-    timestamp  timestamp   not null,
+    timestamp  long        not null,
     event_type varchar(10) not null,
     operation  varchar(10) not null,
     entity_id  int         not null,
