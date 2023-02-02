@@ -24,7 +24,7 @@ public interface FilmStorage {
 
     Collection<Film> getUserRecommendations(Integer userId);
 
-    void deleteFilmById(Integer id);
+    boolean deleteFilmById(Integer id);
 
     Set<Film> search(String query, Set<SearchBy> searchFields);
 
