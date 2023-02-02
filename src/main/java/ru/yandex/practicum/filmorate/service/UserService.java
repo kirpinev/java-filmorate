@@ -40,7 +40,9 @@ public class UserService {
     }
 
     public void deleteUserById(Integer id) {
-        userStorage.deleteUserById(id);
+        if (!userStorage.deleteUserById(id)) {
+            throw new NotFoundException("пользователя с id " + id + " нет");
+        }
     }
 
     public Collection<User> getUserFriends(Integer id) {

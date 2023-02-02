@@ -77,7 +77,9 @@ public class FilmService {
     }
 
     public void deleteFilmById(Integer id) {
-        filmStorage.deleteFilmById(id);
+        if (!filmStorage.deleteFilmById(id)) {
+            throw new NotFoundException("фильма с id " + id + " нет");
+        }
     }
 
     public Collection<Film> getCommonFilms(Integer userId, Integer friendId) {
