@@ -15,9 +15,8 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
 
+    private static final String USERS_SQL = "select * from users";
     private final JdbcTemplate jdbcTemplate;
-    private static final  String USERS_SQL = "select * from users";
-
 
     @Override
     public User createUser(User user) {

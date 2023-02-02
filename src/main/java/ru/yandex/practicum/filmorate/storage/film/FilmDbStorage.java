@@ -7,12 +7,12 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.constants.SearchBy;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.filmDirector.FilmDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.filmMpa.FilmMpaStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
+
 import java.sql.PreparedStatement;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,9 +25,9 @@ public class FilmDbStorage implements FilmStorage {
             "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join film_mpas fm on f.id = fm.film_id " +
                     "left join mpas m on fm.mpa_id = m.id";
     private static final String SEARCH_FILM_BASE_QUERY =
-            "SELECT DISTINCT films.id id FROM films " +
-                    "LEFT JOIN film_directors on films.id = film_directors.film_id " +
-                    "LEFT JOIN directors ON film_directors.director_id = directors.director_id ";
+            "select distinct films.id as id from films " +
+                    "left join film_directors on films.id = film_directors.film_id " +
+                    "left join directors on film_directors.director_id = directors.director_id ";
     private final JdbcTemplate jdbcTemplate;
     private final FilmMpaStorage filmMpaStorage;
     private final MpaStorage mpaStorage;
@@ -175,14 +175,14 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getUserRecommendations(Integer userId) {
-        String sql = "SELECT l.user_id " +
-                "FROM likes AS l " +
-                "WHERE l.film_id IN " +
-                "(SELECT film_id " +
-                "FROM likes l1 " +
-                "WHERE user_id = ?) and l.user_id <> ?" +
-                "GROUP BY l.user_id " +
-                "ORDER BY COUNT(l.film_id) " +
+        String sql = "select l.user_id " +
+                "from likes as l " +
+                "where l.film_id in " +
+                "(select film_id " +
+                "from likes l1 " +
+                "where user_id = ?) and l.user_id <> ?" +
+                "group by l.user_id " +
+                "order by count(l.film_id) " +
                 "limit 1";
 
         final List<Integer> userIds = jdbcTemplate.query(sql, (rs, rowNum) -> rs.getInt("user_id"), userId, userId);
@@ -193,11 +193,11 @@ public class FilmDbStorage implements FilmStorage {
 
         int similarUserId = userIds.get(0);
 
-        String filmsFromUser = "SELECT f.*, m.id AS mpa_id, m.name AS mpa_name " +
-                "FROM films AS f LEFT JOIN film_mpas AS fm ON f.id = fm.film_id " +
-                "LEFT JOIN mpas AS m ON fm.mpa_id = m.id " +
-                "LEFT JOIN likes AS l ON f.id = l.film_id " +
-                "WHERE l.user_id = ?";
+        String filmsFromUser = "select f.*, m.id as mpa_id, m.name as mpa_name " +
+                "from films as f left join film_mpas as fm on f.id = fm.film_id " +
+                "left join mpas as m on fm.mpa_id = m.id " +
+                "left join likes as l on f.id = l.film_id " +
+                "where l.user_id = ?";
 
         List<Film> userFilms = jdbcTemplate.query(filmsFromUser, new FilmMapper(), userId);
         List<Film> similarUserFilms = jdbcTemplate.query(filmsFromUser, new FilmMapper(), similarUserId);
@@ -221,7 +221,7 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
-   private Film addExtraFields(Film film) {
+    private Film addExtraFields(Film film) {
 
         int filmId = film.getId();
         int mpaId = film.getMpa().getId();
@@ -254,7 +254,7 @@ public class FilmDbStorage implements FilmStorage {
         return new HashSet<>(setFilmGenresAndDirectors(films));
     }
 
-    private Set<Film> getFilmsByIds (Set<Integer> filmIds) {
+    private Set<Film> getFilmsByIds(Set<Integer> filmIds) {
         String joinedFilmIds = filmIds.stream().map(x -> Integer.toString(x)).collect(Collectors.joining(","));
         String searchQuery = String.format("%s WHERE f.id IN (%s)", FILMS_SQL, joinedFilmIds);
         return new HashSet<>(jdbcTemplate.query(searchQuery, new FilmMapper()));

@@ -12,17 +12,19 @@ import ru.yandex.practicum.filmorate.model.SortBy;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.validation.FilmValidator;
-import java.util.*;
-import java.util.stream.Collectors;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class FilmService {
 
-    private static final String NOT_FOUND_FILM = "фильма с id %s нет";
+    private static final String NOT_FOUND_FILM = "Фильма с id %s нет";
     private final FilmStorage filmStorage;
     private final UserService userService;
     private final LikeService likeService;
@@ -84,7 +86,7 @@ public class FilmService {
 
     public void deleteFilmById(Integer id) {
         if (!filmStorage.deleteFilmById(id)) {
-            throw new NotFoundException("фильма с id " + id + " нет");
+            throw new NotFoundException(String.format(NOT_FOUND_FILM, id));
         }
     }
 
