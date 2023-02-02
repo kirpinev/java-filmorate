@@ -6,10 +6,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.*;
-import ru.yandex.practicum.filmorate.constants.DirectorErrorMessages;
-import ru.yandex.practicum.filmorate.constants.SortBy;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.SortBy;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -31,7 +28,7 @@ public class FilmDbStorage implements FilmStorage {
     private final MpaStorage mpaStorage;
     private final FilmGenreStorage filmGenreStorage;
     private final FilmDirectorStorage filmDirectorStorage;
-    private final String filmsSql =
+    private static final String FILMS_SQL =
             "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join film_mpas fm on f.id = fm.film_id " +
                     "left join mpas m on fm.mpa_id = m.id";
 
@@ -61,12 +58,12 @@ public class FilmDbStorage implements FilmStorage {
 
         film.setId(filmId);
 
-        return addCredentials(film);
+        return addExtraFields(film);
     }
 
     @Override
     public Film getFilmById(Integer filmId) {
-        List<Film> films = jdbcTemplate.query(filmsSql.concat(" where f.id = ?"), new FilmMapper(), filmId);
+        List<Film> films = jdbcTemplate.query(FILMS_SQL.concat(" where f.id = ?"), new FilmMapper(), filmId);
 
         if (!films.isEmpty()) {
             Collection<Genre> filmGenres = filmGenreStorage.getAllFilmGenresById(filmId);
@@ -80,7 +77,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getAllFilms() {
-        Collection<Film> films = jdbcTemplate.query(filmsSql, new FilmMapper());
+        Collection<Film> films = jdbcTemplate.query(FILMS_SQL, new FilmMapper());
 
         return setFilmGenresAndDirectors(films);
     }
@@ -98,7 +95,7 @@ public class FilmDbStorage implements FilmStorage {
         filmGenreStorage.deleteAllFilmGenresById(film.getId());
         filmDirectorStorage.deleteFilmDirectors(film.getId());
 
-        return addCredentials(film);
+        return addExtraFields(film);
     }
 
     @Override
@@ -146,18 +143,18 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> getDirectorFilms(Integer directorId, SortBy sortBy) {
         String yearOrderSql = "select f.*, " +
-                "       m.id mpa_id, " +
-                "       m.name mpa_name " +
+                "       m.id as mpa_id, " +
+                "       m.name as mpa_name " +
                 "from film_directors fd " +
                 "         join films f on f.id = fd.film_id " +
                 "         join film_mpas fm on f.id = fm.film_id " +
                 "         join mpas m on fm.mpa_id = m.id " +
                 "where director_id = ? " +
-                "order by year(f.release_date) asc";
+                "order by year(f.release_date)";
 
         String likesOrderSql = "select f.*,  " +
-                "       m.id mpa_id,  " +
-                "       m.name mpa_name,  " +
+                "       m.id as mpa_id,  " +
+                "       m.name as mpa_name,  " +
                 "       (select count(*) from likes where fd.film_id = likes.film_id) as likes " +
                 "from film_directors fd " +
                 "join films f on f.id = fd.film_id " +
@@ -167,10 +164,10 @@ public class FilmDbStorage implements FilmStorage {
                 "order by likes desc;";
 
         Collection<Film> films =
-                jdbcTemplate.query(sortBy == SortBy.likes ? likesOrderSql : yearOrderSql, new FilmMapper(), directorId);
+                jdbcTemplate.query(sortBy == SortBy.LIKES ? likesOrderSql : yearOrderSql, new FilmMapper(), directorId);
 
         if (films.isEmpty()) {
-            throw new NotFoundException(String.format(DirectorErrorMessages.notFound, directorId));
+            return Collections.emptyList();
         }
 
         return setFilmGenresAndDirectors(films);
@@ -214,7 +211,7 @@ public class FilmDbStorage implements FilmStorage {
         Map<Integer, Collection<Genre>> filmGenresMap = filmGenreStorage.getAllFilmGenres(films);
         Map<Integer, Collection<Director>> filmDirectorsMap = filmDirectorStorage.getFilmDirectors(films);
 
-        films.stream().forEach(film -> {
+        films.forEach(film -> {
             Integer filmId = film.getId();
 
             film.setGenres(filmGenresMap.getOrDefault(filmId, new ArrayList<>()));
@@ -225,7 +222,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
 
-    private Film addCredentials(Film film) {
+    private Film addExtraFields(Film film) {
         int filmId = film.getId();
         int mpaId = film.getMpa().getId();
 

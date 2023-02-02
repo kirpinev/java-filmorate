@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.constants.EventOperation;
 import ru.yandex.practicum.filmorate.constants.EventType;
-import ru.yandex.practicum.filmorate.constants.SortBy;
+import ru.yandex.practicum.filmorate.model.SortBy;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -40,7 +40,13 @@ public class FilmService {
     }
 
     public Collection<Film> getDirectorFilms(Integer directorId, SortBy sortBy) {
-        return filmStorage.getDirectorFilms(directorId, sortBy);
+        Collection<Film> films = filmStorage.getDirectorFilms(directorId, sortBy);
+
+        if (films.isEmpty()) {
+            throw new NotFoundException(String.format(DirectorService.NOT_FOUND, directorId));
+        }
+
+        return films;
     }
 
     public Collection<Film> getRecommendations(Integer userId) {

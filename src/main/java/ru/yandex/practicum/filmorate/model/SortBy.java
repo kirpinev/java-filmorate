@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.constants;
+package ru.yandex.practicum.filmorate.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,8 +6,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public enum SortBy {
-    year("year"),
-    likes("likes");
+    YEAR("year"),
+    LIKES("likes");
 
     public final String label;
 }
