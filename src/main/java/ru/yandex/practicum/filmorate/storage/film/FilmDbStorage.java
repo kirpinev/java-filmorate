@@ -24,10 +24,9 @@ public class FilmDbStorage implements FilmStorage {
     private static final String FILMS_SQL =
             "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join film_mpas fm on f.id = fm.film_id " +
                     "left join mpas m on fm.mpa_id = m.id";
-    private static final String SEARCH_FILM_BASE_QUERY =
-            "select distinct films.id as id from films " +
-                    "left join film_directors on films.id = film_directors.film_id " +
-                    "left join directors on film_directors.director_id = directors.director_id ";
+    private static final String SEARCH_FILM_BASE_QUERY = "select distinct films.id as id from films " +
+            "left join film_directors on films.id = film_directors.film_id " +
+            "left join directors on film_directors.director_id = directors.director_id ";
     private final JdbcTemplate jdbcTemplate;
     private final FilmMpaStorage filmMpaStorage;
     private final MpaStorage mpaStorage;
@@ -42,10 +41,7 @@ public class FilmDbStorage implements FilmStorage {
         KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    sql,
-                    new String[]{"id"}
-            );
+            PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
             preparedStatement.setString(1, film.getName());
             preparedStatement.setObject(2, film.getReleaseDate());
             preparedStatement.setString(3, film.getDescription());
@@ -88,13 +84,18 @@ public class FilmDbStorage implements FilmStorage {
         final String sql = "update films set name = ?, release_date = ?, description = ?, duration = ?, " +
                 "rate = ? where id = ?";
 
-        jdbcTemplate.update(sql, film.getName(), film.getReleaseDate(), film.getDescription(),
-                film.getDuration(), film.getRate(), film.getId()
-        );
-
         filmMpaStorage.deleteFilmMpaById(film.getId());
         filmGenreStorage.deleteAllFilmGenresById(film.getId());
         filmDirectorStorage.deleteFilmDirectors(film.getId());
+
+        jdbcTemplate.update(sql,
+                film.getName(),
+                film.getReleaseDate(),
+                film.getDescription(),
+                film.getDuration(),
+                film.getRate(),
+                film.getId()
+        );
 
         return addExtraFields(film);
     }
@@ -163,8 +164,11 @@ public class FilmDbStorage implements FilmStorage {
                 "where director_id = ? " +
                 "order by likes desc;";
 
-        Collection<Film> films =
-                jdbcTemplate.query(sortBy == SortBy.LIKES ? likesOrderSql : yearOrderSql, new FilmMapper(), directorId);
+        Collection<Film> films = jdbcTemplate.query(
+                sortBy == SortBy.LIKES ? likesOrderSql : yearOrderSql,
+                new FilmMapper(),
+                directorId
+        );
 
         if (films.isEmpty()) {
             return Collections.emptyList();
@@ -227,7 +231,7 @@ public class FilmDbStorage implements FilmStorage {
         int mpaId = film.getMpa().getId();
 
         filmMpaStorage.addFilmMpa(filmId, mpaId);
-        new LinkedHashSet<>(film.getGenres()).forEach(genre -> filmGenreStorage.addFilmGenre(filmId, genre.getId()));
+        film.getGenres().forEach(genre -> filmGenreStorage.addFilmGenre(filmId, genre.getId()));
 
         Mpa filmMpa = mpaStorage.getMpaById(mpaId);
         Collection<Genre> filmGenres = filmGenreStorage.getAllFilmGenresById(filmId);

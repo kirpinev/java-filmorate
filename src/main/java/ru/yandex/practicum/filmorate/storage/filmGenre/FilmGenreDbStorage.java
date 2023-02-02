@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.storage.filmGenre;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -13,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class FilmGenreDbStorage implements FilmGenreStorage {
@@ -23,7 +26,12 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     public void addFilmGenre(Integer filmId, Integer genreId) {
         final String sql = "insert into film_genres (film_id, genre_id) values (?, ?)";
 
-        jdbcTemplate.update(sql, filmId, genreId);
+        try {
+            jdbcTemplate.update(sql, filmId, genreId);
+        }
+        catch (DuplicateKeyException e) {
+            log.warn("Обнаружен дубликат ключей. filmId: {}, genreId: {}", filmId, genreId);
+        }
     }
 
     @Override

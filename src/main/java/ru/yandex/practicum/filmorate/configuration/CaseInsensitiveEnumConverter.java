@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.configuration;
 import org.springframework.core.convert.converter.Converter;
 
 public class CaseInsensitiveEnumConverter<T extends Enum<T>> implements Converter<String, T> {
-    private Class<T> enumClass;
+    private final Class<T> enumClass;
 
     public CaseInsensitiveEnumConverter(Class<T> enumClass) {
         this.enumClass = enumClass;

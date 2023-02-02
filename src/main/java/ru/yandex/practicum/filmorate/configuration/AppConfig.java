@@ -14,6 +14,7 @@ public class AppConfig implements WebMvcConfigurer {
     public void addFormatters(FormatterRegistry registry) {
         List<Class<? extends Enum>> enums = List.of(SortBy.class);
         enums.forEach(enumClass -> registry.addConverter(String.class, enumClass,
-                new CaseInsensitiveEnumConverter<>(enumClass)));
+                new CaseInsensitiveEnumConverter<>(enumClass)
+        ));
     }
 }
