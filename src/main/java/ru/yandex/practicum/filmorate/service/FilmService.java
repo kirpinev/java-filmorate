@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.constants.EventOperation;
 import ru.yandex.practicum.filmorate.constants.EventType;
@@ -10,9 +11,12 @@ import ru.yandex.practicum.filmorate.model.SortBy;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.validation.FilmValidator;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import java.util.Collection;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FilmService {
@@ -90,4 +94,16 @@ public class FilmService {
             throw new NotFoundException(String.format(NOT_FOUND_FILM, id));
         }
     }
+
+    public Set<Film> search(String query, SearchBy[] searchBy) {
+        log.debug("Запрошен поиск сочетания \"{}\" в полях: {}", query, searchBy);
+        Set<SearchBy> searchFields = Arrays.stream(searchBy)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        log.trace("Отфильтрованный список полей: {}", searchFields);
+        Set<Film> foundFilms = filmStorage.search(query, searchFields);
+        log.debug("Найдены фильмы, подходящие под условия: {}", foundFilms);
+        return foundFilms;
+    }
+
 }

@@ -1,20 +1,23 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.constants.SearchBy;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.filmDirector.FilmDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.filmMpa.FilmMpaStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
-
 import java.sql.PreparedStatement;
 import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
@@ -217,8 +220,8 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
+   private Film addExtraFields(Film film) {
 
-    private Film addExtraFields(Film film) {
         int filmId = film.getId();
         int mpaId = film.getMpa().getId();
 
@@ -233,4 +236,27 @@ public class FilmDbStorage implements FilmStorage {
 
         return film.toBuilder().mpa(filmMpa).genres(filmGenres).directors(directors).build();
     }
+
+    @Override
+    public Set<Film> search(String query, Set<SearchBy> searchFields) {
+
+        String searchQueryParameters = searchFields.stream()
+                .map(field -> "Lower(" + field.getSqlTableAndFieldName() + ") LIKE '%" + query.toLowerCase() + "%'")
+                .collect(Collectors.joining(" OR "));
+        String searchQuery = SEARCH_FILM_BASE_QUERY + " WHERE " + searchQueryParameters;
+        log.trace("Текст запроса поиска фильмов: {}", SEARCH_FILM_BASE_QUERY + searchQuery);
+
+        Set<Integer> filmIds = new HashSet<>(jdbcTemplate.query(searchQuery, (rs, rowNum) -> rs.getInt("id")));
+        log.trace("Получены следующие ID фильмов, подходящие под условия поиска: {}", filmIds);
+        Set<Film> films = getFilmsByIds(filmIds);
+        log.trace("Получен список фильмов по ID: {}", films);
+        return new HashSet<>(setFilmGenresAndDirectors(films));
+    }
+
+    private Set<Film> getFilmsByIds (Set<Integer> filmIds) {
+        String joinedFilmIds = filmIds.stream().map(x -> Integer.toString(x)).collect(Collectors.joining(","));
+        String searchQuery = String.format("%s WHERE f.id IN (%s)", filmsSql, joinedFilmIds);
+        return new HashSet<>(jdbcTemplate.query(searchQuery, new FilmMapper()));
+    }
+
 }
