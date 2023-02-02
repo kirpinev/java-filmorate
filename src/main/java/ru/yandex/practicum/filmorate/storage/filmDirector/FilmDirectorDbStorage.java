@@ -25,14 +25,14 @@ public class FilmDirectorDbStorage implements FilmDirectorStorage {
         }
 
         String sqlQuery = "insert into film_directors(director_id, film_id) " +
-            "values ( ?, ? )";
+                "values ( ?, ? )";
 
         try {
             jdbcTemplate.batchUpdate(
-                sqlQuery, directors, directors.size(), (PreparedStatement ps, Director director) -> {
-                    ps.setLong(1, director.getId());
-                    ps.setLong(2, filmId);
-                });
+                    sqlQuery, directors, directors.size(), (PreparedStatement ps, Director director) -> {
+                        ps.setLong(1, director.getId());
+                        ps.setLong(2, filmId);
+                    });
         }
         catch (DataIntegrityViolationException e) {
             log.error(e.getMessage());
@@ -43,9 +43,9 @@ public class FilmDirectorDbStorage implements FilmDirectorStorage {
     @Override
     public Collection<Director> getFilmDirectors(Integer filmId) {
         String sqlQuery = "select d.* " +
-            "from film_directors fd " +
-            "join directors d on d.director_id = fd.director_id " +
-            "where film_id = ?";
+                "from film_directors fd " +
+                "join directors d on d.director_id = fd.director_id " +
+                "where film_id = ?";
 
         return jdbcTemplate.query(sqlQuery, new DirectorMapper(), filmId);
     }
@@ -56,26 +56,26 @@ public class FilmDirectorDbStorage implements FilmDirectorStorage {
 
         String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
         String sqlQuery = "select fd.film_id, d.* " +
-            "from film_directors fd " +
-            "join directors d on d.director_id = fd.director_id " +
-            "where film_id in (%s);";
+                "from film_directors fd " +
+                "join directors d on d.director_id = fd.director_id " +
+                "where film_id in (%s);";
 
         DirectorMapper directorMapper = new DirectorMapper();
 
         jdbcTemplate.query(
-            String.format(sqlQuery, inSql),
-            (rs, rowNum) -> {
-                Integer filmId = rs.getInt("film_id");
-                Director director = directorMapper.mapRow(rs, rowNum);
-                Collection<Director> directors = directorsByFilmId.getOrDefault(filmId, new ArrayList<>());
-                directors.add(director);
+                String.format(sqlQuery, inSql),
+                (rs, rowNum) -> {
+                    Integer filmId = rs.getInt("film_id");
+                    Director director = directorMapper.mapRow(rs, rowNum);
+                    Collection<Director> directors = directorsByFilmId.getOrDefault(filmId, new ArrayList<>());
+                    directors.add(director);
 
-                return directorsByFilmId.put(
-                    filmId,
-                    directors
-                );
-            },
-            films.stream().map(film -> Integer.toString(film.getId())).toArray()
+                    return directorsByFilmId.put(
+                            filmId,
+                            directors
+                    );
+                },
+                films.stream().map(film -> Integer.toString(film.getId())).toArray()
         );
 
         return directorsByFilmId;
@@ -84,7 +84,7 @@ public class FilmDirectorDbStorage implements FilmDirectorStorage {
     @Override
     public void deleteFilmDirectors(Integer filmId) {
         String sqlQuery = "delete from film_directors " +
-            "where film_id = ?";
+                "where film_id = ?";
 
         jdbcTemplate.update(sqlQuery, filmId);
     }

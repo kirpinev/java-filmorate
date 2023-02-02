@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Review;
+
 import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Objects;
@@ -16,38 +17,30 @@ import java.util.Objects;
 @Component("ReviewDbStorage")
 public class ReviewDbStorage implements ReviewStorage {
 
-    private final JdbcTemplate template;
-    private final ReviewMapper reviewMapper;
-
     private static final String GET_REVIEW_BASE_QUERY =
             "SELECT review_id, film_id, user_id, useful, is_positive, content FROM reviews ";
-
     private static final String GET_ALL_REVIEWS = GET_REVIEW_BASE_QUERY + " ORDER BY useful DESC";
-
     private static final String GET_REVIEW_BY_ID_QUERY =
             GET_REVIEW_BASE_QUERY + " WHERE review_id = ?";
-
     private static final String GET_REVIEW_BY_FILM_ID_QUERY =
             GET_REVIEW_BASE_QUERY + " WHERE film_id = ? ORDER BY useful DESC";
-
     private static final String SAVE_REVIEW_QUERY =
             "INSERT INTO reviews (film_id, user_id, useful, is_positive, content) VALUES (?, ?, ?, ?, ?)";
-
     private static final String UPDATE_REVIEW_QUERY =
             "UPDATE reviews SET useful = ?, is_positive = ?, content = ? WHERE review_id = ?";
-
     private static final String DELETE_REVIEW_BY_ID_QUERY =
             "DELETE FROM reviews WHERE review_id = ?";
-
     private static final String CHECK_REVIEW_EXISTS_BY_ID_QUERY =
             "SELECT EXISTS(SELECT review_id FROM reviews WHERE review_id = ?) isExists";
+    private final JdbcTemplate template;
+    private final ReviewMapper reviewMapper;
 
     @Override
     public Review add(Review review) {
         KeyHolder holder = new GeneratedKeyHolder();
 
         template.update(conn -> {
-            PreparedStatement smt = conn.prepareStatement(SAVE_REVIEW_QUERY, new String[] {"review_id"});
+            PreparedStatement smt = conn.prepareStatement(SAVE_REVIEW_QUERY, new String[]{"review_id"});
             smt.setInt(1, review.getFilmId());
             smt.setInt(2, review.getUserId());
             smt.setInt(3, review.getUseful());
@@ -66,7 +59,8 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Review update(Review filmReview) {
-        template.update(UPDATE_REVIEW_QUERY,
+        template.update(
+                UPDATE_REVIEW_QUERY,
                 filmReview.getUseful(),
                 filmReview.getIsPositive(),
                 filmReview.getContent(),

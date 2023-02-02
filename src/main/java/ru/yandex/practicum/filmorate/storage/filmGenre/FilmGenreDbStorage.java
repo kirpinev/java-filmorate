@@ -29,7 +29,7 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     @Override
     public Collection<Genre> getAllFilmGenresById(Integer filmId) {
         final String sql = "select g.id as id, name from film_genres fg left join genres g on " +
-            "fg.genre_id = g.id where film_id = ?";
+                "fg.genre_id = g.id where film_id = ?";
 
         return jdbcTemplate.query(sql, new GenreMapper(), filmId);
     }
@@ -44,7 +44,7 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
     @Override
     public Map<Integer, Collection<Genre>> getAllFilmGenres(Collection<Film> films) {
         final String sql = "select fg.film_id as film_id, g.id as genre_id, g.name as name from film_genres fg " +
-            "left join genres g on fg.genre_id = g.id where fg.film_id in (%s)";
+                "left join genres g on fg.genre_id = g.id where fg.film_id in (%s)";
 
         Map<Integer, Collection<Genre>> filmGenresMap = new HashMap<>();
         Collection<String> ids = films.stream().map(film -> String.valueOf(film.getId())).collect(Collectors.toList());

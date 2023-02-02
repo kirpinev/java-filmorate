@@ -6,11 +6,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.SortBy;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.filmDirector.FilmDirectorStorage;
 import ru.yandex.practicum.filmorate.storage.filmGenre.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.filmMpa.FilmMpaStorage;
@@ -23,15 +19,14 @@ import java.util.*;
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
 
+    private static final String FILMS_SQL =
+            "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join film_mpas fm on f.id = fm.film_id " +
+                    "left join mpas m on fm.mpa_id = m.id";
     private final JdbcTemplate jdbcTemplate;
     private final FilmMpaStorage filmMpaStorage;
     private final MpaStorage mpaStorage;
     private final FilmGenreStorage filmGenreStorage;
     private final FilmDirectorStorage filmDirectorStorage;
-    private static final String FILMS_SQL =
-            "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join film_mpas fm on f.id = fm.film_id " +
-                    "left join mpas m on fm.mpa_id = m.id";
-
 
     @Override
     public Film createFilm(Film film) {
@@ -101,9 +96,10 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Collection<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
         final Collection<String> params = new ArrayList<>();
-        String sql = "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join likes l on f.id = l.film_id " +
-                "left join film_mpas fm on f.id = fm.film_id left join mpas m on fm.mpa_id = m.id " +
-                "left join film_genres fg on f.id = fg.film_id %s group by f.name, f.id order by count(l.film_id) desc limit ?";
+        String sql =
+                "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join likes l on f.id = l.film_id " +
+                        "left join film_mpas fm on f.id = fm.film_id left join mpas m on fm.mpa_id = m.id " +
+                        "left join film_genres fg on f.id = fg.film_id %s group by f.name, f.id order by count(l.film_id) desc limit ?";
 
         if (Objects.nonNull(genreId)) {
             params.add(String.format("genre_id = %s", genreId));

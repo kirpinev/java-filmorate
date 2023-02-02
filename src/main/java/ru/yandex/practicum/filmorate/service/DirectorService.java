@@ -27,7 +27,7 @@ public class DirectorService {
 
     public Director getDirectorById(Integer id) {
         return directorStorage.getDirectorById(id).orElseThrow(() -> new NotFoundException(String.format(
-            NOT_FOUND, id)));
+                NOT_FOUND, id)));
     }
 
     public Collection<Director> getAllDirectors() {

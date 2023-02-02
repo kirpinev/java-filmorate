@@ -17,7 +17,7 @@ import java.util.Objects;
 public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final String usersSql = "select * from users";
+    private static final  String USERS_SQL = "select * from users";
 
 
     @Override
@@ -48,15 +48,16 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User getUserById(Integer userId) {
         try {
-            return jdbcTemplate.queryForObject(usersSql.concat(" where id = ?"), new UserMapper(), userId);
-        } catch (Exception e) {
+            return jdbcTemplate.queryForObject(USERS_SQL.concat(" where id = ?"), new UserMapper(), userId);
+        }
+        catch (Exception e) {
             return null;
         }
     }
 
     @Override
     public Collection<User> getAllUsers() {
-        return jdbcTemplate.query(usersSql, new UserMapper());
+        return jdbcTemplate.query(USERS_SQL, new UserMapper());
     }
 
     @Override

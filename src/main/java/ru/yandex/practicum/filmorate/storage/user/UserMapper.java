@@ -11,12 +11,12 @@ public class UserMapper implements RowMapper<User> {
     @Override
     public User mapRow(ResultSet rs, int rowNum) throws SQLException {
         return new User()
-            .toBuilder()
-            .id(rs.getInt("id"))
-            .name(rs.getString("name"))
-            .login(rs.getString("login"))
-            .birthday(Objects.requireNonNull(rs.getDate("birthday")).toLocalDate())
-            .email(rs.getString("email"))
-            .build();
+                .toBuilder()
+                .id(rs.getInt("id"))
+                .name(rs.getString("name"))
+                .login(rs.getString("login"))
+                .birthday(Objects.requireNonNull(rs.getDate("birthday")).toLocalDate())
+                .email(rs.getString("email"))
+                .build();
     }
 }
