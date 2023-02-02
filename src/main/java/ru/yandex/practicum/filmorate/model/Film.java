@@ -10,7 +10,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collection;
 
 @Data
@@ -30,6 +29,6 @@ public class Film {
     private int duration;
     private Mpa mpa;
     private int rate;
-    private Collection<Genre> genres = new ArrayList<>();
-    private Collection<Director> directors = new ArrayList<>();
+    private Collection<Genre> genres;
+    private Collection<Director> directors;
 }

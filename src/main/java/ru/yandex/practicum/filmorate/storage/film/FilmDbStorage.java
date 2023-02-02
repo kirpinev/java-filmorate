@@ -21,10 +21,13 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
-
     private static final String FILMS_SQL =
             "select f.*, m.id as mpa_id, m.name as mpa_name from films f left join film_mpas fm on f.id = fm.film_id " +
                     "left join mpas m on fm.mpa_id = m.id";
+    private static final String SEARCH_FILM_BASE_QUERY =
+            "SELECT DISTINCT films.id id FROM films " +
+                    "LEFT JOIN film_directors on films.id = film_directors.film_id " +
+                    "LEFT JOIN directors ON film_directors.director_id = directors.director_id ";
     private final JdbcTemplate jdbcTemplate;
     private final FilmMpaStorage filmMpaStorage;
     private final MpaStorage mpaStorage;
@@ -255,7 +258,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private Set<Film> getFilmsByIds (Set<Integer> filmIds) {
         String joinedFilmIds = filmIds.stream().map(x -> Integer.toString(x)).collect(Collectors.joining(","));
-        String searchQuery = String.format("%s WHERE f.id IN (%s)", filmsSql, joinedFilmIds);
+        String searchQuery = String.format("%s WHERE f.id IN (%s)", FILMS_SQL, joinedFilmIds);
         return new HashSet<>(jdbcTemplate.query(searchQuery, new FilmMapper()));
     }
 
