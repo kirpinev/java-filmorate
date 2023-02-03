@@ -100,19 +100,6 @@ create table if not exists feed
     primary key (event_id)
 );
 
-create table if not exists reviews
-(
-    review_id   int,
-    content     varchar(255) not null,
-    is_positive boolean      not null,
-    useful      int default 0,
-    user_id     int,
-    film_id     int,
-    primary key (review_id),
-    foreign key (user_id) references users (id) on delete cascade,
-    foreign key (film_id) references films (id) on delete cascade
-);
-
 create table if not exists directors
 (
     director_id int auto_increment,
