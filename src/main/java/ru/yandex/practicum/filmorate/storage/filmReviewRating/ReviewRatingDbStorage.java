@@ -57,7 +57,10 @@ public class ReviewRatingDbStorage implements ReviewRatingStorage {
     }
 
     private Integer getReviewUsefulScore(Integer reviewId) {
-        return template.queryForObject(GET_REVIEW_USEFUL_SCORE_ON_REVIEW_ID, reviewRatingMapper, reviewId);
+        return template.query(GET_REVIEW_USEFUL_SCORE_ON_REVIEW_ID, reviewRatingMapper, reviewId)
+                .stream()
+                .findAny()
+                .orElse(null);
     }
 
 }

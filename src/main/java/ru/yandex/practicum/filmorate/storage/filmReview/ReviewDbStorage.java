@@ -49,12 +49,8 @@ public class ReviewDbStorage implements ReviewStorage {
             return smt;
         }, holder);
 
-        Number key = holder.getKey();
-        if (Objects.isNull(key)) {
-            log.warn("Ошибка при получении id записываемого в БД отзыва {}, БД вернула пустой результат", review);
-            throw new RuntimeException("Запись отзыва в БД не удалась");
-        }
-        return getById(key.intValue());
+        int reviewId = Objects.requireNonNull(holder.getKey()).intValue();
+        return getById(reviewId);
     }
 
     @Override
