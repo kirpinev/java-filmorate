@@ -3,15 +3,10 @@ package ru.yandex.practicum.filmorate.storage.director;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import ru.yandex.practicum.filmorate.constants.DirectorErrorMessages;
-import ru.yandex.practicum.filmorate.exception.ConflictException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.sql.PreparedStatement;
@@ -26,52 +21,46 @@ public class DirectorDbStorage implements DirectorStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    @ResponseStatus(HttpStatus.CREATED)
     public Director createDirector(Director director) {
         String sqlQuery = "insert into directors(name) values (?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[] {"director_id"});
+            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"director_id"});
             stmt.setString(1, director.getName());
             return stmt;
         }, keyHolder);
 
         Number key = keyHolder.getKey();
-
-        if (Objects.isNull(key)) {
-            throw new ConflictException(DirectorErrorMessages.conflict);
-        }
-
-        director.setId(key.intValue());
+        director.setId(Objects.requireNonNull(key).intValue());
         return director;
     }
 
     @Override
-    public Director updateDirector(Director director) {
+    public Optional<Director> updateDirector(Director director) {
         String sqlQuery = "update directors set " +
-            "name = ? " +
-            "where director_id = ?";
+                "name = ? " +
+                "where director_id = ?";
 
         int status = jdbcTemplate.update(
-            sqlQuery,
-            director.getName(),
-            director.getId()
+                sqlQuery,
+                director.getName(),
+                director.getId()
         );
 
         if (status == 0) {
-            throw new NotFoundException(String.format(DirectorErrorMessages.notFound, director.getId()));
+            return Optional.empty();
         }
 
-        return director;
+        return Optional.of(director);
     }
 
     @Override
     public Optional<Director> getDirectorById(Integer id) {
         String sqlQuery = "select * " +
-            "from directors  " +
-            "where director_id = ?;";
+                "from directors  " +
+                "where director_id = ?;";
 
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, new DirectorMapper(), id));
@@ -84,20 +73,18 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public Collection<Director> getAllDirectors() {
         String sqlQuery = "select * " +
-            "from directors";
+                "from directors";
 
         return jdbcTemplate.query(sqlQuery, new DirectorMapper());
     }
 
     @Override
-    public void deleteDirector(Integer id) {
+    public Boolean deleteDirector(Integer id) {
         String sqlQuery = "delete from directors " +
-            "where director_id = ?";
+                "where director_id = ?";
 
         int status = jdbcTemplate.update(sqlQuery, id);
 
-        if (status == 0) {
-            throw new NotFoundException(String.format(DirectorErrorMessages.notFound, id));
-        }
+        return status != 0;
     }
 }

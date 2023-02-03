@@ -12,12 +12,12 @@ import java.util.Collection;
 public class MpaDbStorage implements MpaStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final String mpasSql = "select * from mpas";
+    private static final String MPAS_SQL = "select * from mpas";
 
     @Override
     public Mpa getMpaById(Integer mpaId) {
         try {
-            return jdbcTemplate.queryForObject(mpasSql.concat(" where id = ?"), new MpaMapper(), mpaId);
+            return jdbcTemplate.queryForObject(MPAS_SQL.concat(" where id = ?"), new MpaMapper(), mpaId);
         }
         catch (Exception e) {
             return null;
@@ -26,6 +26,6 @@ public class MpaDbStorage implements MpaStorage {
 
     @Override
     public Collection<Mpa> getAllMpa() {
-        return jdbcTemplate.query(mpasSql, new MpaMapper());
+        return jdbcTemplate.query(MPAS_SQL, new MpaMapper());
     }
 }

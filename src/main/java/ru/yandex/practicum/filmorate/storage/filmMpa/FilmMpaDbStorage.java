@@ -23,7 +23,7 @@ public class FilmMpaDbStorage implements FilmMpaStorage {
     @Override
     public Mpa getFilmMpaById(Integer filmId) {
         final String sql =
-            "select m.id as id, name from film_mpas fm left join mpas m on fm.mpa_id = m.id where film_id = ?";
+                "select m.id as id, name from film_mpas fm left join mpas m on fm.mpa_id = m.id where film_id = ?";
 
         return jdbcTemplate.queryForObject(sql, new MpaMapper(), filmId);
     }

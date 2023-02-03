@@ -8,12 +8,12 @@ import java.util.Optional;
 public interface DirectorStorage {
     Director createDirector(Director director);
 
-    Director updateDirector(Director director);
+    Optional<Director> updateDirector(Director director);
 
     Optional<Director> getDirectorById(Integer id);
 
     Collection<Director> getAllDirectors();
 
-    void deleteDirector(Integer id);
+    Boolean deleteDirector(Integer id);
 
 }

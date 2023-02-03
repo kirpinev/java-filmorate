@@ -1,8 +1,9 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import ru.yandex.practicum.filmorate.constants.SearchBy;
-import ru.yandex.practicum.filmorate.constants.SortBy;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.SortBy;
+
 import java.util.Collection;
 import java.util.Set;
 

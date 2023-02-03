@@ -4,9 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.constants.SearchBy;
-import ru.yandex.practicum.filmorate.constants.SortBy;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.SortBy;
 import ru.yandex.practicum.filmorate.service.FilmService;
+
 import javax.validation.Valid;
 import java.util.Collection;
 import java.util.Set;
@@ -48,8 +49,10 @@ public class FilmController {
     }
 
     @GetMapping("/common")
-    public Collection<Film> getCommonFilms(@RequestParam(name = "userId") Integer userId,
-                                           @RequestParam(name = "friendId") Integer friendId) {
+    public Collection<Film> getCommonFilms(
+            @RequestParam(name = "userId") Integer userId,
+            @RequestParam(name = "friendId") Integer friendId
+    ) {
         return filmService.getCommonFilms(userId, friendId);
     }
 

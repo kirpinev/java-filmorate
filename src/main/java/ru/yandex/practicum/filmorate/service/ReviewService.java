@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.constants.EventOperation;
 import ru.yandex.practicum.filmorate.constants.EventType;
-import ru.yandex.practicum.filmorate.exception.ReviewValidationException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ReviewValidationException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.filmReview.ReviewStorage;
@@ -85,19 +85,19 @@ public class ReviewService {
         log.debug("Лайк добавлен");
     }
 
-    public void addDislikeToFilmReview (Integer reviewId, Integer userId) {
+    public void addDislikeToFilmReview(Integer reviewId, Integer userId) {
         log.debug("Добавление дизлайка отзыву с id = {} от пользователя с id = {}", reviewId, userId);
         changeUserReviewReaction(reviewId, userId, false);
         log.debug("Дизлайк добавлен");
     }
 
-    public void deleteLikeFromFilmReview (Integer reviewId, Integer userId) {
+    public void deleteLikeFromFilmReview(Integer reviewId, Integer userId) {
         log.debug("Удаление лайка к отзыву с id = {} от пользователя с id = {}", reviewId, userId);
         clearUserReviewReaction(reviewId, userId, true);
         log.debug("Выполнено");
     }
 
-    public void deleteDislikeFromFilmReview (Integer reviewId, Integer userId) {
+    public void deleteDislikeFromFilmReview(Integer reviewId, Integer userId) {
         log.debug("Удаление дизлайка к отзыву с id = {} от пользователя с id = {}", reviewId, userId);
         clearUserReviewReaction(reviewId, userId, false);
         log.debug("Выполнено");
@@ -145,7 +145,7 @@ public class ReviewService {
         log.debug("Проверки пройдены успешно");
     }
 
-    private Review checkIfReviewExists (Integer reviewId) {
+    private Review checkIfReviewExists(Integer reviewId) {
         return Optional.ofNullable(reviewStorage.getById(reviewId))
                 .orElseThrow(() -> new NotFoundException("Отзыв не обнаружен"));
     }

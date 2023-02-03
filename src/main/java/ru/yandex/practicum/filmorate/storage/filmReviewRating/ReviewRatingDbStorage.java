@@ -10,20 +10,16 @@ import org.springframework.stereotype.Component;
 @Component("ReviewRatingDbStorage")
 public class ReviewRatingDbStorage implements ReviewRatingStorage {
 
-    private final JdbcTemplate template;
-    private final ReviewRatingMapper reviewRatingMapper;
-
     private static final String MERGE_REVIEW_RATING_QUERY =
             "MERGE INTO review_ratings (review_id, user_id, is_positive) VALUES (?, ?, ?)";
-
     private static final String DELETE_REVIEW_RATING_BY_REVIEW_ID_USER_ID =
             "DELETE FROM review_ratings WHERE review_id = ? AND user_id = ?";
-
     private static final String GET_REVIEW_USEFUL_SCORE_ON_REVIEW_ID =
             "SELECT SUM(CASE WHEN is_positive = TRUE THEN 1 ELSE -1 END) useful FROM review_ratings WHERE review_id = ?";
-
     private static final String UPDATE_REVIEW_USEFUL_SCORE_ON_USEFUL_SCORE_REVIEW_ID =
             "UPDATE reviews SET useful = ? WHERE review_id = ?";
+    private final JdbcTemplate template;
+    private final ReviewRatingMapper reviewRatingMapper;
 
     @Override
     public void addLikeToFilmReview(Integer reviewId, Integer userId) {
@@ -60,7 +56,7 @@ public class ReviewRatingDbStorage implements ReviewRatingStorage {
         template.update(UPDATE_REVIEW_USEFUL_SCORE_ON_USEFUL_SCORE_REVIEW_ID, usefulScore, reviewId);
     }
 
-    private Integer getReviewUsefulScore (Integer reviewId) {
+    private Integer getReviewUsefulScore(Integer reviewId) {
         return template.queryForObject(GET_REVIEW_USEFUL_SCORE_ON_REVIEW_ID, reviewRatingMapper, reviewId);
     }
 

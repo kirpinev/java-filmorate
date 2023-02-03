@@ -56,14 +56,18 @@ public class ErrorHandler {
         String name = e.getName();
         String message;
 
-        if (e.getRequiredType().isEnum()) {
+        var type = e.getRequiredType();
+
+        if (Objects.nonNull(type) && type.isEnum()) {
             message = String.format("Параметр '%s' должен иметь значения: %s", name,
-                Arrays.toString(e.getRequiredType().getEnumConstants())
+                    Arrays.toString(type.getEnumConstants())
+            );
+        } else if (Objects.nonNull(type)) {
+            message = String.format("Параметр '%s' должен быть типа '%s",
+                    name, type.getSimpleName()
             );
         } else {
-            message = String.format("Параметр '%s' должен быть типа '%s",
-                name, e.getRequiredType().getSimpleName()
-            );
+            message = e.getMessage();
         }
 
         log.error(message);
