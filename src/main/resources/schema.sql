@@ -62,13 +62,13 @@ create table if not exists reviews
 
 create table if not exists review_ratings
 (
-    review_id int,
-    user_id int,
-    is_positive boolean,
-    foreign key (review_id) references reviews (review_id) on delete cascade,
+    review_id     int,
+    user_id   int,
+    is_positive boolean not null,
+    primary key (user_id, review_id),
     foreign key (user_id) references users (id) on delete cascade,
-    primary key (review_id, user_id)
-);
+    foreign key (review_id) references reviews (review_id) on delete cascade
+    );
 
 create table if not exists film_genres
 (
@@ -111,16 +111,6 @@ create table if not exists reviews
     primary key (review_id),
     foreign key (user_id) references users (id) on delete cascade,
     foreign key (film_id) references films (id) on delete cascade
-);
-
-create table if not exists review_ratings
-(
-    user_id     int,
-    review_id   int,
-    is_positive boolean not null,
-    primary key (user_id, review_id),
-    foreign key (user_id) references users (id) on delete cascade,
-    foreign key (review_id) references reviews (review_id) on delete cascade
 );
 
 create table if not exists directors
