@@ -1,30 +1,37 @@
 package ru.yandex.practicum.filmorate.storage.filmGenre;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreMapper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
-@Qualifier("FilmGenreDbStorage")
+@RequiredArgsConstructor
 public class FilmGenreDbStorage implements FilmGenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public FilmGenreDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public void addFilmGenre(Integer filmId, Integer genreId) {
         final String sql = "insert into film_genres (film_id, genre_id) values (?, ?)";
 
-        jdbcTemplate.update(sql, filmId, genreId);
+        try {
+            jdbcTemplate.update(sql, filmId, genreId);
+        }
+        catch (DuplicateKeyException e) {
+            log.warn("Обнаружен дубликат ключей. filmId: {}, genreId: {}", filmId, genreId);
+        }
     }
 
     @Override
@@ -50,14 +57,13 @@ public class FilmGenreDbStorage implements FilmGenreStorage {
         Map<Integer, Collection<Genre>> filmGenresMap = new HashMap<>();
         Collection<String> ids = films.stream().map(film -> String.valueOf(film.getId())).collect(Collectors.toList());
 
-        jdbcTemplate.query(String.format(sql, String.join(",", ids)), (rs) -> {
+        jdbcTemplate.query(String.format(sql, String.join(",", ids)), rs -> {
             Genre genre = new Genre(rs.getInt("genre_id"), rs.getString("name"));
 
-            if (!filmGenresMap.containsKey(rs.getInt("film_id"))) {
-                filmGenresMap.put(rs.getInt("film_id"), new ArrayList<>());
-            }
+            Integer filmId = rs.getInt("film_id");
 
-            filmGenresMap.get(rs.getInt("film_id")).add(genre);
+            filmGenresMap.putIfAbsent(filmId, new ArrayList<>());
+            filmGenresMap.get(filmId).add(genre);
         });
 
         return filmGenresMap;

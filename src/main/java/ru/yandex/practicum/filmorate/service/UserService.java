@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.EventOperation;
+import ru.yandex.practicum.filmorate.model.EventType;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.friendship.FriendshipStorage;
@@ -11,17 +13,13 @@ import ru.yandex.practicum.filmorate.validation.UserValidator;
 import java.util.Collection;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private static final String NOT_FOUND_MESSAGE = "пользователя с id %s нет";
     private final UserStorage userStorage;
     private final FriendshipStorage friendshipStorage;
-
-    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage,
-                       @Qualifier("FriendshipDbStorage") FriendshipStorage friendshipStorage) {
-        this.userStorage = userStorage;
-        this.friendshipStorage = friendshipStorage;
-    }
+    private final EventService eventService;
 
     public User createUser(User user) {
         setUserName(user);
@@ -41,7 +39,15 @@ public class UserService {
         return user;
     }
 
+    public void deleteUserById(Integer id) {
+        if (!userStorage.deleteUserById(id)) {
+            throw new NotFoundException(String.format(NOT_FOUND_MESSAGE, id));
+        }
+    }
+
     public Collection<User> getUserFriends(Integer id) {
+        User user = userStorage.getUserById(id);
+        checkUserIsNotFound(user, id);
         return userStorage.getUserFriends(id);
     }
 
@@ -60,10 +66,12 @@ public class UserService {
 
     public void addFriend(Integer userId, Integer friendId) {
         friendshipStorage.addFriend(userId, getUserById(friendId).getId());
+        eventService.createEvent(userId, EventType.FRIEND, EventOperation.ADD, friendId);
     }
 
     public void deleteFriend(Integer userId, Integer friendId) {
         friendshipStorage.deleteFriend(userId, friendId);
+        eventService.createEvent(userId, EventType.FRIEND, EventOperation.REMOVE, friendId);
     }
 
     private void checkUserIsNotFound(User user, Integer id) {
@@ -77,4 +85,6 @@ public class UserService {
             user.setName(user.getLogin());
         }
     }
+
+
 }

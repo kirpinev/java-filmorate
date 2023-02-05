@@ -1,17 +1,14 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.storage.like.LikeStorage;
 
 @Service
+@RequiredArgsConstructor
 public class LikeService {
 
     private final LikeStorage likeStorage;
-
-    public LikeService(@Qualifier("LikeDbStorage") LikeStorage likeStorage) {
-        this.likeStorage = likeStorage;
-    }
 
     public void addLikeToFilm(Integer filmId, Integer userId) {
         likeStorage.addLikeToFilm(filmId, userId);

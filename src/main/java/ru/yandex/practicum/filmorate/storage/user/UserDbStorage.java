@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -8,19 +8,15 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.PreparedStatement;
-import java.util.*;
+import java.util.Collection;
+import java.util.Objects;
 
 @Component
-@Qualifier("UserDbStorage")
+@RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
 
+    private static final String USERS_SQL = "select * from users";
     private final JdbcTemplate jdbcTemplate;
-    private final String usersSql = "select * from users";
-
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-
-    }
 
     @Override
     public User createUser(User user) {
@@ -28,8 +24,10 @@ public class UserDbStorage implements UserStorage {
         KeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(sql,
-                    new String[]{"id"});
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                    sql,
+                    new String[]{"id"}
+            );
             preparedStatement.setString(1, user.getName());
             preparedStatement.setString(2, user.getLogin());
             preparedStatement.setObject(3, user.getBirthday());
@@ -48,15 +46,16 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User getUserById(Integer userId) {
         try {
-            return jdbcTemplate.queryForObject(usersSql.concat(" where id = ?"), new UserMapper(), userId);
-        } catch (Exception e) {
+            return jdbcTemplate.queryForObject(USERS_SQL.concat(" where id = ?"), new UserMapper(), userId);
+        }
+        catch (Exception e) {
             return null;
         }
     }
 
     @Override
     public Collection<User> getAllUsers() {
-        return jdbcTemplate.query(usersSql, new UserMapper());
+        return jdbcTemplate.query(USERS_SQL, new UserMapper());
     }
 
     @Override
@@ -86,5 +85,12 @@ public class UserDbStorage implements UserStorage {
                 "u.id = f.user_id where u.id = ?)";
 
         return jdbcTemplate.query(sql, new UserMapper(), user1Id, user2Id);
+    }
+
+    @Override
+    public boolean deleteUserById(Integer id) {
+        final String sql = "delete from users where id = ?";
+        int status = jdbcTemplate.update(sql, id);
+        return status != 0;
     }
 }

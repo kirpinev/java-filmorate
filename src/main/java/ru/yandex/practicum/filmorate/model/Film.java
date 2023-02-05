@@ -31,4 +31,5 @@ public class Film {
     private Mpa mpa;
     private int rate;
     private Collection<Genre> genres = new ArrayList<>();
+    private Collection<Director> directors = new ArrayList<>();
 }
